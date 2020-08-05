@@ -8,6 +8,18 @@ Begin Menu MainMenuBar
       AutoEnabled = True
       AutoEnable = True
       Visible = True
+      Begin MenuItem FileOpenMenu
+         SpecialMenu = 0
+         Value = "&Open Repo..."
+         Index = -2147483648
+         Text = "&Open Repo..."
+         ShortcutKey = "O"
+         Shortcut = "Cmd+O"
+         MenuModifier = True
+         AutoEnabled = True
+         AutoEnable = True
+         Visible = True
+      End
       Begin QuitMenuItem FileQuit
          SpecialMenu = 0
          Value = "#App.kFileQuit"
