@@ -104,7 +104,7 @@ Begin Window WndRepo
       AllowRowReordering=   False
       Bold            =   False
       ColumnCount     =   2
-      ColumnWidths    =   "70%"
+      ColumnWidths    =   ",75"
       DataField       =   ""
       DataSource      =   ""
       DefaultRowHeight=   -1
@@ -120,7 +120,7 @@ Begin Window WndRepo
       HasHorizontalScrollbar=   False
       HasVerticalScrollbar=   True
       HeadingIndex    =   -1
-      Height          =   277
+      Height          =   222
       Index           =   -2147483648
       InitialParent   =   ""
       InitialValue    =   "Line	Count"
@@ -132,7 +132,7 @@ Begin Window WndRepo
       LockRight       =   True
       LockTop         =   True
       RequiresSelection=   False
-      RowSelectionType=   "0"
+      RowSelectionType=   "1"
       Scope           =   2
       TabIndex        =   2
       TabPanelIndex   =   0
@@ -146,6 +146,70 @@ Begin Window WndRepo
       _ScrollOffset   =   0
       _ScrollWidth    =   -1
    End
+   Begin PushButton BtnStage
+      AllowAutoDeactivate=   True
+      Bold            =   False
+      Cancel          =   False
+      Caption         =   "Stage"
+      Default         =   False
+      Enabled         =   False
+      FontName        =   "System"
+      FontSize        =   0.0
+      FontUnit        =   0
+      Height          =   20
+      Index           =   -2147483648
+      InitialParent   =   ""
+      Italic          =   False
+      Left            =   500
+      LockBottom      =   True
+      LockedInPosition=   False
+      LockLeft        =   False
+      LockRight       =   True
+      LockTop         =   False
+      MacButtonStyle  =   "0"
+      Scope           =   2
+      TabIndex        =   3
+      TabPanelIndex   =   0
+      TabStop         =   True
+      Tooltip         =   ""
+      Top             =   337
+      Transparent     =   False
+      Underline       =   False
+      Visible         =   True
+      Width           =   80
+   End
+   Begin PushButton BtnRevert
+      AllowAutoDeactivate=   True
+      Bold            =   False
+      Cancel          =   False
+      Caption         =   "Revert"
+      Default         =   False
+      Enabled         =   False
+      FontName        =   "System"
+      FontSize        =   0.0
+      FontUnit        =   0
+      Height          =   20
+      Index           =   -2147483648
+      InitialParent   =   ""
+      Italic          =   False
+      Left            =   408
+      LockBottom      =   True
+      LockedInPosition=   False
+      LockLeft        =   False
+      LockRight       =   True
+      LockTop         =   False
+      MacButtonStyle  =   "0"
+      Scope           =   2
+      TabIndex        =   4
+      TabPanelIndex   =   0
+      TabStop         =   True
+      Tooltip         =   ""
+      Top             =   337
+      Transparent     =   False
+      Underline       =   False
+      Visible         =   True
+      Width           =   80
+   End
 End
 #tag EndWindow
 
@@ -158,6 +222,24 @@ End
 
 
 	#tag Method, Flags = &h21
+		Private Function GetSelectedLines() As Git_MTC.DiffLine()
+		  var arr() as Git_MTC.DiffLine
+		  
+		  for row as integer = 0 to LbLines.RowCount - 1
+		    if LbLines.Selected( row ) then
+		      var rowArr() as Git_MTC.DiffLine = LbLines.RowTagAt( row )
+		      for each dl as Git_MTC.DiffLine in rowArr
+		        arr.AddRow dl
+		      next
+		    end if
+		  next
+		  
+		  return arr
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
 		Private Sub RefreshFromRepo()
 		  //
 		  // Refresh the current data from the repo
@@ -168,7 +250,8 @@ End
 		  end if
 		  
 		  lblCurrentBranch.Value = Repo.CurrentBranch
-		  var diffs() as Git_MTC.DiffFile = Repo.GetDiffs
+		  Repo.Refresh
+		  var diffs() as Git_MTC.DiffFile = Repo.Diffs
 		  
 		  //
 		  // Harvest the lines
@@ -178,22 +261,14 @@ End
 		  for each df as Git_MTC.DiffFile in diffs
 		    for each hunk as Git_MTC.Hunk in df.Hunks
 		      for each dl as Git_MTC.DiffLine in hunk.Lines
-		        var indicator as string
-		        select case dl.LineType
-		        case Git_MTC.LineTypes.Unchanged
+		        if dl.LineType = Git_MTC.LineTypes.Unchanged then
 		          //
 		          // Don't care
 		          //
 		          continue for dl
-		          
-		        case Git_MTC.LineTypes.Addition
-		          indicator = "+"
-		          
-		        case Git_MTC.LineTypes.Subtraction
-		          indicator = "-"
-		          
-		        end select
+		        end if
 		        
+		        var indicator as string = dl.Symbol
 		        var key as string = indicator + dl.Value.Trim // 0, 1, or 2 to indicate type
 		        
 		        var arr() as Git_MTC.DiffLine 
@@ -234,6 +309,15 @@ End
 		  end try
 		  
 		  RefreshFromRepo
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub StageSelectedLines()
+		  var selected() as Git_MTC.DiffLine = GetSelectedLines
+		  Repo.StageLines( selected )
+		  
+		  
 		End Sub
 	#tag EndMethod
 
@@ -307,6 +391,25 @@ End
 		  me.SortingColumn = 1
 		  me.HeadingIndex = 1
 		  me.ColumnSortDirectionAt( 1 ) = ListBox.SortDirections.Descending
+		  
+		  me.ColumnAlignmentAt( 1 ) = ListBox.Alignments.Right
+		  
+		End Sub
+	#tag EndEvent
+	#tag Event
+		Sub Change()
+		  var isEnabled as boolean = me.SelectedRowCount <> 0
+		  BtnStage.Enabled = isEnabled
+		  BtnRevert.Enabled = isEnabled
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events BtnStage
+	#tag Event
+		Sub Action()
+		  StageSelectedLines
+		  RefreshFromRepo
+		  
 		End Sub
 	#tag EndEvent
 #tag EndEvents

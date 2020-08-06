@@ -59,6 +59,22 @@ Protected Class DiffLine
 		Private ParentWR As WeakRef
 	#tag EndProperty
 
+	#tag ComputedProperty, Flags = &h0
+		#tag Getter
+			Get
+			  select case LineType
+			  case Git_MTC.LineTypes.Unchanged
+			    return " "
+			  case Git_MTC.LineTypes.Addition
+			    return "+"
+			  case Git_MTC.LineTypes.Subtraction
+			    return "-"
+			  end select
+			End Get
+		#tag EndGetter
+		Symbol As String
+	#tag EndComputedProperty
+
 	#tag Property, Flags = &h0
 		ToLine As Integer
 	#tag EndProperty
@@ -114,7 +130,36 @@ Protected Class DiffLine
 			Visible=false
 			Group="Behavior"
 			InitialValue=""
+			Type="Git_MTC.LineTypes"
+			EditorType="Enum"
+			#tag EnumValues
+				"0 - Unchanged"
+				"1 - Addition"
+				"2 - Subtraction"
+			#tag EndEnumValues
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="FromLine"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
 			Type="Integer"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="ToLine"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="Integer"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Value"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="String"
 			EditorType=""
 		#tag EndViewProperty
 	#tag EndViewBehavior

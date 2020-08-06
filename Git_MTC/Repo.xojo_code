@@ -28,8 +28,8 @@ Protected Class Repo
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Function GetDiffs() As DiffFile()
+	#tag Method, Flags = &h21
+		Private Sub GetDiffs()
 		  var diffString as string = GitIt( GitFolder, kGitDiff )
 		  System.DebugLog diffString
 		  
@@ -54,9 +54,22 @@ Protected Class Repo
 		    self.Diffs.AddRow( df )
 		  next
 		  
-		  return diffs
+		  self.Diffs = diffs
 		  
-		End Function
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Refresh()
+		  GetDiffs
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub StageLines(lines() As Git_MTC.DiffLine)
+		  
+		End Sub
 	#tag EndMethod
 
 
@@ -76,8 +89,8 @@ Protected Class Repo
 		CurrentBranch As String
 	#tag EndComputedProperty
 
-	#tag Property, Flags = &h21
-		Private Diffs() As Git_MTC.DiffFile
+	#tag Property, Flags = &h0
+		Diffs() As Git_MTC.DiffFile
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
@@ -145,7 +158,7 @@ Protected Class Repo
 			Group="Behavior"
 			InitialValue=""
 			Type="String"
-			EditorType=""
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="EOL"
@@ -153,7 +166,7 @@ Protected Class Repo
 			Group="Behavior"
 			InitialValue=""
 			Type="String"
-			EditorType=""
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class
