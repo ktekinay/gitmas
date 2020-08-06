@@ -24,13 +24,88 @@ Begin Window WndRepo
    Type            =   "0"
    Visible         =   True
    Width           =   600
+   Begin Label Labels
+      AllowAutoDeactivate=   True
+      Bold            =   False
+      DataField       =   ""
+      DataSource      =   ""
+      Enabled         =   True
+      FontName        =   "System"
+      FontSize        =   0.0
+      FontUnit        =   0
+      Height          =   20
+      Index           =   0
+      InitialParent   =   ""
+      Italic          =   False
+      Left            =   20
+      LockBottom      =   False
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   False
+      LockTop         =   True
+      Multiline       =   False
+      Scope           =   2
+      Selectable      =   False
+      TabIndex        =   0
+      TabPanelIndex   =   0
+      TabStop         =   True
+      TextAlignment   =   "0"
+      TextColor       =   &c00000000
+      Tooltip         =   ""
+      Top             =   20
+      Transparent     =   False
+      Underline       =   False
+      Value           =   "Current Branch:"
+      Visible         =   True
+      Width           =   121
+   End
+   Begin Label LblCurrentBranch
+      AllowAutoDeactivate=   True
+      Bold            =   False
+      DataField       =   ""
+      DataSource      =   ""
+      Enabled         =   True
+      FontName        =   "System"
+      FontSize        =   0.0
+      FontUnit        =   0
+      Height          =   20
+      Index           =   -2147483648
+      InitialParent   =   ""
+      Italic          =   False
+      Left            =   171
+      LockBottom      =   False
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   True
+      LockTop         =   True
+      Multiline       =   False
+      Scope           =   2
+      Selectable      =   False
+      TabIndex        =   1
+      TabPanelIndex   =   0
+      TabStop         =   True
+      TextAlignment   =   "0"
+      TextColor       =   &c00000000
+      Tooltip         =   ""
+      Top             =   20
+      Transparent     =   False
+      Underline       =   False
+      Value           =   "Unknown"
+      Visible         =   True
+      Width           =   409
+   End
 End
 #tag EndWindow
 
 #tag WindowCode
 	#tag Method, Flags = &h21
-		Private Sub Init()
+		Private Sub RefreshFromRepo()
+		  //
+		  // Refresh the current data from the repo
+		  //
 		  
+		  lblCurrentBranch.Value = Repo.CurrentBranch
+		  var diffs() as Git_MTC.DiffFile = Repo.GetDiffs
 		End Sub
 	#tag EndMethod
 
@@ -38,15 +113,21 @@ End
 		Sub Show(repoPath As FolderItem)
 		  Super.Show()
 		  
-		  RepoFolderItem = repoPath
-		  Init
+		  try
+		    Repo = new Git_MTC.Repo( repoPath )
+		  catch err as Git_MTC.GitException
+		    MessageBox "This does not appear to be a git repo"
+		    Close
+		    return
+		  end try
 		  
+		  RefreshFromRepo
 		End Sub
 	#tag EndMethod
 
 
 	#tag Property, Flags = &h0
-		RepoFolderItem As FolderItem
+		Repo As Git_MTC.Repo
 	#tag EndProperty
 
 
