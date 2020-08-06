@@ -94,18 +94,130 @@ Begin Window WndRepo
       Visible         =   True
       Width           =   409
    End
+   Begin Listbox LbLines
+      AllowAutoDeactivate=   True
+      AllowAutoHideScrollbars=   True
+      AllowExpandableRows=   False
+      AllowFocusRing  =   True
+      AllowResizableColumns=   False
+      AllowRowDragging=   False
+      AllowRowReordering=   False
+      Bold            =   False
+      ColumnCount     =   2
+      ColumnWidths    =   "70%"
+      DataField       =   ""
+      DataSource      =   ""
+      DefaultRowHeight=   -1
+      DropIndicatorVisible=   False
+      Enabled         =   True
+      FontName        =   "SmallSystem"
+      FontSize        =   0.0
+      FontUnit        =   0
+      GridLinesHorizontalStyle=   "0"
+      GridLinesVerticalStyle=   "0"
+      HasBorder       =   True
+      HasHeader       =   True
+      HasHorizontalScrollbar=   False
+      HasVerticalScrollbar=   True
+      HeadingIndex    =   -1
+      Height          =   277
+      Index           =   -2147483648
+      InitialParent   =   ""
+      InitialValue    =   "Line	Count"
+      Italic          =   False
+      Left            =   20
+      LockBottom      =   True
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   True
+      LockTop         =   True
+      RequiresSelection=   False
+      RowSelectionType=   "0"
+      Scope           =   2
+      TabIndex        =   2
+      TabPanelIndex   =   0
+      TabStop         =   True
+      Tooltip         =   ""
+      Top             =   103
+      Transparent     =   False
+      Underline       =   False
+      Visible         =   True
+      Width           =   560
+      _ScrollOffset   =   0
+      _ScrollWidth    =   -1
+   End
 End
 #tag EndWindow
 
 #tag WindowCode
+	#tag Event
+		Sub Activate()
+		  RefreshFromRepo
+		End Sub
+	#tag EndEvent
+
+
 	#tag Method, Flags = &h21
 		Private Sub RefreshFromRepo()
 		  //
 		  // Refresh the current data from the repo
 		  //
 		  
+		  if Repo is nil then
+		    return
+		  end if
+		  
 		  lblCurrentBranch.Value = Repo.CurrentBranch
 		  var diffs() as Git_MTC.DiffFile = Repo.GetDiffs
+		  
+		  //
+		  // Harvest the lines
+		  //
+		  var lineDict as new Dictionary
+		  
+		  for each df as Git_MTC.DiffFile in diffs
+		    for each hunk as Git_MTC.Hunk in df.Hunks
+		      for each dl as Git_MTC.DiffLine in hunk.Lines
+		        var indicator as string
+		        select case dl.LineType
+		        case Git_MTC.LineTypes.Unchanged
+		          //
+		          // Don't care
+		          //
+		          continue for dl
+		          
+		        case Git_MTC.LineTypes.Addition
+		          indicator = "+"
+		          
+		        case Git_MTC.LineTypes.Subtraction
+		          indicator = "-"
+		          
+		        end select
+		        
+		        var key as string = indicator + dl.Value.Trim // 0, 1, or 2 to indicate type
+		        
+		        var arr() as Git_MTC.DiffLine 
+		        arr = lineDict.Lookup( key, arr )
+		        arr.Append( dl )
+		        lineDict.Value( key ) = arr
+		      next
+		    next
+		  next
+		  
+		  //
+		  // Fill in the listbox
+		  //
+		  LbLines.RemoveAllRows
+		  for each key as string in lineDict.Keys
+		    var arr() as Git_MTC.DiffLine = lineDict.Value( key )
+		    LbLines.AddRow( key ) // Remove the indicator
+		    LbLines.CellValueAt( LbLines.LastRowIndex, 1 ) = arr.Count.ToString
+		    lbLines.RowTagAt( LbLines.LastRowIndex ) = arr
+		  next
+		  
+		  LbLines.Sort
+		  
+		  return
 		End Sub
 	#tag EndMethod
 
@@ -133,6 +245,71 @@ End
 
 #tag EndWindowCode
 
+#tag Events LbLines
+	#tag Event
+		Function CompareRows(row1 as Integer, row2 as Integer, column as Integer, ByRef result as Integer) As Boolean
+		  if column <> 1 then
+		    return false
+		  end if
+		  
+		  var arr1() as Git_MTC.DiffLine = me.RowTagAt( row1 )
+		  var arr2() as Git_MTC.DiffLine = me.RowTagAt( row2 )
+		  
+		  result = arr1.Count - arr2.Count
+		  
+		  if result = 0 then
+		    //
+		    // Let's see if these lines appear next to each other anywhere
+		    //
+		    for each dl1 as Git_MTC.DiffLine in arr1
+		      for each dl2 as Git_MTC.DiffLine in arr2
+		        if dl2.Parent = dl1.Parent then
+		          //
+		          // Same hunk
+		          //
+		          if dl1.LineType <> dl2.LineType then
+		            //
+		            // They are different line types, so we will list the subtraction before the addition
+		            //
+		            result = integer( dl2.LineType ) - integer( dl1.LineType )
+		          else
+		            //
+		            // Same type, so let's get the relative result
+		            //
+		            result = ( dl1.FromLine - dl2.FromLine ) + ( dl1.ToLine - dl2.ToLine )
+		          end if
+		          
+		          exit for dl1 // We're done
+		        end if
+		      next
+		    next
+		    
+		    //
+		    // If it's a reverse sort, we need to flip the result
+		    //
+		    if me.ColumnSortDirectionAt( 1 ) = ListBox.SortDirections.Descending then
+		      result = 0 - result
+		    end if
+		  end if
+		  
+		  if result = 0 then
+		    //
+		    // Couldn't find the result in any other way, so let's use the name
+		    //
+		    result = me.CellValueAt( row1, 0 ).Compare( me.CellValueAt( row2, 0 ) )
+		  end if
+		  
+		  return true
+		End Function
+	#tag EndEvent
+	#tag Event
+		Sub Open()
+		  me.SortingColumn = 1
+		  me.HeadingIndex = 1
+		  me.ColumnSortDirectionAt( 1 ) = ListBox.SortDirections.Descending
+		End Sub
+	#tag EndEvent
+#tag EndEvents
 #tag ViewBehavior
 	#tag ViewProperty
 		Name="Name"

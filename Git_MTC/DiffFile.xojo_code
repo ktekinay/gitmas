@@ -35,35 +35,61 @@ Protected Class DiffFile
 		  'Visible         =   True
 		  'Width           =   235
 		  
-		  var hunkStrings() as string = diffString.Split( &u0A + "@@ " )
+		  const kHunkSep as string = "@@ "
+		  
+		  Parent = repo
+		  
+		  var hunkStrings() as string = diffString.Split( &u0A + kHunkSep )
 		  var headerLines() as string = hunkStrings( 0 ).Split( &u0A )
 		  hunkStrings.RemoveRowAt( 0 )
 		  
-		  //
-		  // Ignore the first line
-		  //
+		  for each header as string  in headerLines
+		    if header.BeginsWith( "index " ) then
+		      FileIndex = header.Middle( 6 )
+		    elseif header.BeginsWith( "---" ) then
+		      FromFile = ExtractFolderItem( repo.GitFolder, header.Middle( 4 ) )
+		    elseif header.BeginsWith( "+++" ) then
+		      ToFile = ExtractFolderItem( repo.GitFolder, header.Middle( 4 ) )
+		    end if
+		  next
+		  
+		  if FromFile.NativePath.Compare( ToFile.NativePath, ComparisonOptions.CaseSensitive ) = 0 then
+		    ToFile = FromFile
+		  end if
 		  
 		  //
-		  // Get the Index
+		  // Create the hunks
 		  //
-		  Index = headerLines( 1 ).Middle( 6 )
-		  
-		  //
-		  // Get the From file
-		  //
-		  FromFile = ExtractFolderItem( repo.GitFolder, headerLines( 2 ).Middle( 4 ) )
-		  ToFile = ExtractFolderItem( repo.GitFolder, headerLines( 3 ).Middle( 4 ) )
-		  
+		  Hunks.RemoveAllRows
+		  for each hunk as string in hunkStrings
+		    Hunks.AddRow( new Git_MTC.Hunk( self, kHunkSep + hunk ) )
+		  next
 		  
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
 		Private Function ExtractFolderItem(parentFolder As FolderItem, path As String) As FolderItem
+		  var left2 as string = path.Left( 2 )
+		  if left2 = "a/" or left2 = "b/" then
+		    path = path.Middle( 1 )
+		  end if
+		  
+		  #if TargetWindows then
+		    path = path.ReplaceAll( "/", "\" )
+		  #endif
+		  
+		  var newPath as string = parentFolder.NativePath + path
+		  var f as new FolderItem( newPath )
+		  return f
 		  
 		End Function
 	#tag EndMethod
 
+
+	#tag Property, Flags = &h0
+		FileIndex As String
+	#tag EndProperty
 
 	#tag Property, Flags = &h0
 		FromFile As FolderItem
@@ -73,8 +99,32 @@ Protected Class DiffFile
 		Hunks() As Hunk
 	#tag EndProperty
 
-	#tag Property, Flags = &h0
-		Index As String
+	#tag ComputedProperty, Flags = &h0
+		#tag Getter
+			Get
+			  if ParentWR is nil then
+			    return nil
+			  else
+			    return Git_MTC.Repo( ParentWR.Value )
+			  end if
+			  
+			End Get
+		#tag EndGetter
+		#tag Setter
+			Set
+			  if value is nil then
+			    ParentWR = nil
+			  else
+			    ParentWR = new WeakRef( value )
+			  end if
+			  
+			End Set
+		#tag EndSetter
+		Parent As Git_MTC.Repo
+	#tag EndComputedProperty
+
+	#tag Property, Flags = &h21
+		Private ParentWR As WeakRef
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
@@ -92,7 +142,7 @@ Protected Class DiffFile
 			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="Index"
+			Name="FileIndex"
 			Visible=true
 			Group="ID"
 			InitialValue="-2147483648"
@@ -120,14 +170,6 @@ Protected Class DiffFile
 			Visible=true
 			Group="Position"
 			InitialValue="0"
-			Type="Integer"
-			EditorType=""
-		#tag EndViewProperty
-		#tag ViewProperty
-			Name="FromFile"
-			Visible=false
-			Group="Behavior"
-			InitialValue=""
 			Type="Integer"
 			EditorType=""
 		#tag EndViewProperty

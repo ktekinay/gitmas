@@ -11,6 +11,7 @@ Class=Repo;Git_MTC/Repo.xojo_code;&h00000000781D27FF;&h000000007BB1AFFF;false
 Class=GitException;Git_MTC/GitException.xojo_code;&h00000000595D97FF;&h000000007BB1AFFF;false
 Class=DiffFile;Git_MTC/DiffFile.xojo_code;&h0000000040DF27FF;&h000000007BB1AFFF;false
 Class=Hunk;Git_MTC/Hunk.xojo_code;&h00000000192107FF;&h000000007BB1AFFF;false
+Class=DiffLine;Git_MTC/DiffLine.xojo_code;&h00000000528537FF;&h000000007BB1AFFF;false
 AppMenuBar=MainMenuBar
 MajorVersion=1
 MinorVersion=0

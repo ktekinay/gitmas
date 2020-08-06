@@ -98,7 +98,7 @@ Protected Module Git_MTC
 	#tag Constant, Name = kCurrentBranch, Type = String, Dynamic = False, Default = \"branch --show-current", Scope = Private
 	#tag EndConstant
 
-	#tag Constant, Name = kGitDiff, Type = String, Dynamic = False, Default = \"diff --no-color", Scope = Private
+	#tag Constant, Name = kGitDiff, Type = String, Dynamic = False, Default = \"diff --no-color --minimal --patch --unified\x3D6 ", Scope = Private
 	#tag EndConstant
 
 	#tag Constant, Name = kGitOptions, Type = String, Dynamic = False, Default = \"--no-pager --no-optional-locks -c color.branch\x3Dfalse -c color.diff\x3Dfalse -c color.status\x3Dfalse -c diff.mnemonicprefix\x3Dfalse -c core.quotepath\x3Dfalse", Scope = Private
@@ -106,6 +106,13 @@ Protected Module Git_MTC
 
 	#tag Constant, Name = kGitStatus, Type = String, Dynamic = False, Default = \"status", Scope = Protected
 	#tag EndConstant
+
+
+	#tag Enum, Name = LineTypes, Type = Integer, Flags = &h1
+		Unchanged
+		  Addition
+		Subtraction
+	#tag EndEnum
 
 
 	#tag ViewBehavior
@@ -146,14 +153,6 @@ Protected Module Git_MTC
 			Visible=true
 			Group="Position"
 			InitialValue="0"
-			Type="Integer"
-			EditorType=""
-		#tag EndViewProperty
-		#tag ViewProperty
-			Name="GitCommand"
-			Visible=false
-			Group="Behavior"
-			InitialValue=""
 			Type="Integer"
 			EditorType=""
 		#tag EndViewProperty

@@ -39,8 +39,19 @@ Protected Class Repo
 		  
 		  var diffs() as DiffFile
 		  var parts() as string = diffString.Split( &u0A + "diff --git " )
+		  
+		  //
+		  // Remove the first part
+		  //
+		  parts.RemoveRowAt( 0 )
+		  
 		  for each part as string in parts
 		    diffs.AddRow new DiffFile( self, part )
+		  next
+		  
+		  self.Diffs.RemoveAllRows
+		  for each df as DiffFile in diffs
+		    self.Diffs.AddRow( df )
 		  next
 		  
 		  return diffs
@@ -64,6 +75,10 @@ Protected Class Repo
 		#tag EndSetter
 		CurrentBranch As String
 	#tag EndComputedProperty
+
+	#tag Property, Flags = &h21
+		Private Diffs() As Git_MTC.DiffFile
+	#tag EndProperty
 
 	#tag Property, Flags = &h0
 		EOL As String
@@ -125,11 +140,19 @@ Protected Class Repo
 			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="mGitFolder"
+			Name="CurrentBranch"
 			Visible=false
 			Group="Behavior"
 			InitialValue=""
-			Type="Integer"
+			Type="String"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="EOL"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="String"
 			EditorType=""
 		#tag EndViewProperty
 	#tag EndViewBehavior
