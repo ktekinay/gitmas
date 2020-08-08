@@ -70,6 +70,8 @@ Protected Class DiffFile
 
 	#tag Method, Flags = &h21
 		Private Function ExtractFolderItem(parentFolder As FolderItem, path As String, ByRef pathSpec As String) As FolderItem
+		  path = path.NthField( &u09, 1 )
+		  
 		  var left1 as string = path.Left( 1 )
 		  var left2 as string = path.Left( 2 )
 		  
