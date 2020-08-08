@@ -182,7 +182,7 @@ Begin Window WndRepo
       AllowAutoDeactivate=   True
       Bold            =   False
       Cancel          =   False
-      Caption         =   "Revert"
+      Caption         =   "Revert..."
       Default         =   False
       Enabled         =   False
       FontName        =   "System"
@@ -210,13 +210,22 @@ Begin Window WndRepo
       Visible         =   True
       Width           =   80
    End
+   Begin Git_MTC.Repo MyRepo
+      Index           =   -2147483648
+      LockedInPosition=   False
+      Scope           =   2
+      TabPanelIndex   =   0
+   End
 End
 #tag EndWindow
 
 #tag WindowCode
 	#tag Event
 		Sub Activate()
-		  RefreshFromRepo
+		  MyRepo.Refresh
+		  //
+		  // Will raise the Changed event if anything is different
+		  //
 		End Sub
 	#tag EndEvent
 
@@ -245,13 +254,12 @@ End
 		  // Refresh the current data from the repo
 		  //
 		  
-		  if Repo is nil then
+		  if MyRepo.GitFolder is nil then
 		    return
 		  end if
 		  
-		  lblCurrentBranch.Value = Repo.CurrentBranch
-		  Repo.Refresh
-		  var diffs() as Git_MTC.DiffFile = Repo.Diffs
+		  lblCurrentBranch.Value = MyRepo.CurrentBranch
+		  var diffs() as Git_MTC.DiffFile = MyRepo.Diffs
 		  
 		  //
 		  // Harvest the lines
@@ -301,7 +309,8 @@ End
 		  Super.Show()
 		  
 		  try
-		    Repo = new Git_MTC.Repo( repoPath )
+		    MyRepo.GitFolder = repoPath
+		    
 		  catch err as Git_MTC.GitException
 		    MessageBox "This does not appear to be a git repo"
 		    Close
@@ -315,16 +324,24 @@ End
 	#tag Method, Flags = &h21
 		Private Sub StageSelectedLines()
 		  var selected() as Git_MTC.DiffLine = GetSelectedLines
-		  Repo.StageLines( selected )
+		  MyRepo.StageLines( selected )
 		  
 		  
 		End Sub
 	#tag EndMethod
 
 
-	#tag Property, Flags = &h0
-		Repo As Git_MTC.Repo
-	#tag EndProperty
+	#tag ComputedProperty, Flags = &h0
+		#tag Getter
+			Get
+			  if MyRepo isa object then
+			    return MyRepo.GitFolder
+			  end if
+			  
+			End Get
+		#tag EndGetter
+		GitFolder As FolderItem
+	#tag EndComputedProperty
 
 
 #tag EndWindowCode
@@ -408,6 +425,23 @@ End
 	#tag Event
 		Sub Action()
 		  StageSelectedLines
+		  RefreshFromRepo
+		  
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events BtnRevert
+	#tag Event
+		Sub Action()
+		  if QuickRequestDialog( self, "Really revert these lines?", "This cannot be undone.", "Revert" ) = "Revert" then
+		    MyRepo.RevertLines( GetSelectedLines )
+		  end if
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events MyRepo
+	#tag Event , Description = 546865206769742073746174757320686173206368616E6765642E
+		Sub Changed()
 		  RefreshFromRepo
 		  
 		End Sub

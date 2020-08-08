@@ -11,8 +11,14 @@ Protected Module Git_MTC
 		  
 		  cmd = cmd + GitCommand + subcommand
 		  
+		  System.DebugLog( "Executing: " + cmd )
 		  var sh as new Shell
-		  sh.Execute cmd
+		  sh.Execute( cmd )
+		  if sh.ExitCode = 0 then
+		    System.DebugLog( "...success" )
+		  else
+		    System.DebugLog( "...FAILED (" + sh.ExitCode.ToString + ")" )
+		  end if
 		  MaybeExceptionFromShell( "Error executing git command " + subcommand, sh )
 		  
 		  return sh.Result.DefineEncoding( Encodings.UTF8 ).Trim
@@ -98,13 +104,19 @@ Protected Module Git_MTC
 	#tag Constant, Name = kCurrentBranch, Type = String, Dynamic = False, Default = \"branch --show-current", Scope = Private
 	#tag EndConstant
 
+	#tag Constant, Name = kGitCheckoutFile, Type = String, Dynamic = False, Default = \"checkout -- ", Scope = Private
+	#tag EndConstant
+
 	#tag Constant, Name = kGitDiff, Type = String, Dynamic = False, Default = \"diff --no-color --minimal --patch --unified\x3D6 ", Scope = Private
 	#tag EndConstant
 
 	#tag Constant, Name = kGitOptions, Type = String, Dynamic = False, Default = \"--no-pager --no-optional-locks -c color.branch\x3Dfalse -c color.diff\x3Dfalse -c color.status\x3Dfalse -c diff.mnemonicprefix\x3Dfalse -c core.quotepath\x3Dfalse", Scope = Private
 	#tag EndConstant
 
-	#tag Constant, Name = kGitStatus, Type = String, Dynamic = False, Default = \"status", Scope = Protected
+	#tag Constant, Name = kGitResetHard, Type = String, Dynamic = False, Default = \"reset --hard HEAD -- ", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = kGitStatus, Type = String, Dynamic = False, Default = \"status -vv ", Scope = Private
 	#tag EndConstant
 
 

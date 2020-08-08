@@ -22,7 +22,7 @@ Inherits Application
 		    var w as Window = Window( i )
 		    if w isa WndRepo then
 		      var wr as WndRepo = WndRepo( w )
-		      if wr.Repo.GitFolder.NativePath = item.NativePath then
+		      if wr.GitFolder.NativePath = item.NativePath then
 		        wr.Show
 		        return
 		      end if

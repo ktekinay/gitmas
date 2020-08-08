@@ -47,9 +47,9 @@ Protected Class DiffFile
 		    if header.BeginsWith( "index " ) then
 		      FileIndex = header.Middle( 6 )
 		    elseif header.BeginsWith( "---" ) then
-		      FromFile = ExtractFolderItem( repo.GitFolder, header.Middle( 4 ) )
+		      FromFile = ExtractFolderItem( repo.GitFolder, header.Middle( 4 ), FromPathSpec )
 		    elseif header.BeginsWith( "+++" ) then
-		      ToFile = ExtractFolderItem( repo.GitFolder, header.Middle( 4 ) )
+		      ToFile = ExtractFolderItem( repo.GitFolder, header.Middle( 4 ), ToPathSpec )
 		    end if
 		  next
 		  
@@ -69,10 +69,17 @@ Protected Class DiffFile
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function ExtractFolderItem(parentFolder As FolderItem, path As String) As FolderItem
+		Private Function ExtractFolderItem(parentFolder As FolderItem, path As String, ByRef pathSpec As String) As FolderItem
+		  var left1 as string = path.Left( 1 )
 		  var left2 as string = path.Left( 2 )
+		  
 		  if left2 = "a/" or left2 = "b/" then
 		    path = path.Middle( 1 )
+		    pathSpec = path.Middle( 1 )
+		  elseif left1 = "/" or ( TargetWindows and left1 = "\" ) then
+		    pathSpec = path.Middle( 1 )
+		  else
+		    pathSpec = path
 		  end if
 		  
 		  #if TargetWindows then
@@ -88,11 +95,19 @@ Protected Class DiffFile
 
 
 	#tag Property, Flags = &h0
+		ChangedLineCount As Integer
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
 		FileIndex As String
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
 		FromFile As FolderItem
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		FromPathSpec As String
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
@@ -131,8 +146,20 @@ Protected Class DiffFile
 		ToFile As FolderItem
 	#tag EndProperty
 
+	#tag Property, Flags = &h0
+		ToPathSpec As String
+	#tag EndProperty
+
 
 	#tag ViewBehavior
+		#tag ViewProperty
+			Name="Index"
+			Visible=true
+			Group="ID"
+			InitialValue="-2147483648"
+			Type="Integer"
+			EditorType=""
+		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Name"
 			Visible=true
@@ -146,8 +173,8 @@ Protected Class DiffFile
 			Visible=true
 			Group="ID"
 			InitialValue="-2147483648"
-			Type="Integer"
-			EditorType=""
+			Type="String"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Super"

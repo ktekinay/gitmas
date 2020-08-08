@@ -73,6 +73,7 @@ Protected Class Hunk
 		  for i as integer = 0 to lines.LastRowIndex
 		    var line as string = lines( i )
 		    var dl as new Git_MTC.DiffLine( self, line )
+		    dl.DiffIndex = i
 		    
 		    select case dl.LineType
 		    case Git_MTC.LineTypes.Unchanged
@@ -84,10 +85,14 @@ Protected Class Hunk
 		      dl.FromLine = -1
 		      dl.ToLine = toIndex
 		      toIndex = toIndex + 1
+		      df.ChangedLineCount = df.ChangedLineCount + 1
+		      
 		    case LineTypes.Subtraction
 		      dl.FromLine = fromIndex
 		      dl.ToLine = -1
 		      fromIndex = fromIndex + 1
+		      df.ChangedLineCount = df.ChangedLineCount + 1
+		      
 		    end select
 		    self.Lines.AddRow( dl )
 		  next
@@ -292,7 +297,7 @@ Protected Class Hunk
 			Group="Behavior"
 			InitialValue=""
 			Type="String"
-			EditorType=""
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="BeforeChanges"
@@ -300,7 +305,7 @@ Protected Class Hunk
 			Group="Behavior"
 			InitialValue=""
 			Type="String"
-			EditorType=""
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="FromStartingLine"

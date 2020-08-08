@@ -24,6 +24,10 @@ Protected Class DiffLine
 
 
 	#tag Property, Flags = &h0
+		DiffIndex As Integer
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
 		FromLine As Integer
 	#tag EndProperty
 
@@ -156,6 +160,14 @@ Protected Class DiffLine
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Value"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="String"
+			EditorType="MultiLineEditor"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Symbol"
 			Visible=false
 			Group="Behavior"
 			InitialValue=""

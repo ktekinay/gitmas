@@ -1,10 +1,45 @@
 #tag Class
 Protected Class Repo
+	#tag Method, Flags = &h21
+		Private Sub CheckStatusTimer_Action(sender As Timer)
+		  if GitFolder is nil then
+		    sender.RunMode = Timer.RunModes.Off
+		  else
+		    sender.RunMode = Timer.RunModes.Multiple
+		    Refresh
+		  end if
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Constructor()
+		  Git_MTC.Init
+		  
+		  CheckStatusTimer = new Timer
+		  AddHandler CheckStatusTimer.Action, WeakAddressOf CheckStatusTimer_Action
+		  CheckStatusTimer.Period = 5 * 1000
+		  CheckStatusTimer.RunMode = Timer.RunModes.Off
+		  
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		Sub Constructor(folder As FolderItem)
-		  Init
-		  call GitIt( folder, kCurrentBranch )
-		  mGitFolder = folder
+		  Constructor()
+		  GitFolder = folder
+		  
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub Destructor()
+		  if CheckStatusTimer isa object then
+		    CheckStatusTimer.RunMode = Timer.RunModes.Off
+		    RemoveHandler CheckStatusTimer.Action, WeakAddressOf CheckStatusTimer_Action
+		    CheckStatusTimer = nil
+		  end if
 		  
 		End Sub
 	#tag EndMethod
@@ -59,9 +94,116 @@ Protected Class Repo
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Function LineSorterByFileAndPosition(l1 As Git_MTC.DiffLine, l2 As Git_MTC.DiffLine) As Integer
+		  var f1 as FolderItem = l1.Parent.Parent.ToFile
+		  var f2 as FolderItem = l2.Parent.Parent.ToFile
+		  
+		  var result as integer = f1.NativePath.Compare( f2.NativePath, ComparisonOptions.CaseSensitive )
+		  
+		  if result = 0 then // Same file
+		    result = l1.DiffIndex - l2.DiffIndex
+		  end if
+		  
+		  return result
+		  
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		Sub Refresh()
-		  GetDiffs
+		  if GitFolder is nil then
+		    CheckStatusTimer.RunMode = Timer.RunModes.Off
+		    
+		  else
+		    CheckStatusTimer.RunMode = Timer.RunModes.Multiple
+		    CheckStatusTimer.Reset
+		    
+		    var currentStatus as string = Git_MTC.GitIt( GitFolder, Git_MTC.kGitStatus )
+		    
+		    if currentStatus.Compare( LastStatus, ComparisonOptions.CaseSensitive ) <> 0 then
+		      //
+		      // Get the current data
+		      //
+		      GetDiffs
+		      
+		      //
+		      // Store the current status
+		      //
+		      LastStatus = currentStatus
+		      
+		      //
+		      // Let the caller know
+		      //
+		      RaiseEvent Changed
+		    end if
+		  end if
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub ResetFile(pathSpec As String)
+		  var path as string = pathSpec
+		  
+		  #if TargetWindows then
+		    path = """" + path + """"
+		  #else
+		    path = "'" + path.ReplaceAll( "'", "'\''" ) + "'"
+		  #endif
+		  
+		  call Git_MTC.GitIt( GitFolder, Git_MTC.kGitCheckoutFile + path )
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub RevertLines(lines() As Git_MTC.DiffLine)
+		  //
+		  // Open each file and remove or add the lines as needed
+		  //
+		  
+		  lines.Sort AddressOf LineSorterByFileAndPosition
+		  
+		  //
+		  // Create a list of files and their lines
+		  //
+		  var dict as new Dictionary
+		  
+		  for each line as Git_MTC.DiffLine in lines
+		    if line.LineType = Git_MTC.LineTypes.Unchanged then
+		      //
+		      // Don't care
+		      //
+		      continue for line
+		    end if
+		    
+		    var df as Git_MTC.DiffFile = line.Parent.Parent
+		    
+		    var arr() as Git_MTC.DiffLine
+		    arr = dict.Lookup( df, arr )
+		    arr.AddRow( line )
+		    dict.Value( df ) = arr
+		  next
+		  
+		  //
+		  // Cycle through the files. If the number of changed lines matches the given lines
+		  // we can reset the file
+		  //
+		  var keys() as variant = dict.Keys
+		  var values() as variant = dict.Values
+		  for i as integer = 0 to keys.LastRowIndex
+		    var df as Git_MTC.DiffFile = keys( i )
+		    var arr() as Git_MTC.DiffLine = values( i )
+		    
+		    if df.ChangedLineCount = arr.Count then
+		      //
+		      // We can reset
+		      //
+		      ResetFile( df.ToPathSpec )
+		      dict.Remove( df )
+		    end if
+		  next
 		  
 		End Sub
 	#tag EndMethod
@@ -72,6 +214,15 @@ Protected Class Repo
 		End Sub
 	#tag EndMethod
 
+
+	#tag Hook, Flags = &h0, Description = 546865206769742073746174757320686173206368616E6765642E
+		Event Changed()
+	#tag EndHook
+
+
+	#tag Property, Flags = &h21
+		Private CheckStatusTimer As Timer
+	#tag EndProperty
 
 	#tag ComputedProperty, Flags = &h0
 		#tag Getter
@@ -100,11 +251,22 @@ Protected Class Repo
 	#tag ComputedProperty, Flags = &h0
 		#tag Getter
 			Get
-			  Return mGitFolder
+			  return mGitFolder
 			End Get
 		#tag EndGetter
+		#tag Setter
+			Set
+			  mGitFolder = value
+			  Refresh
+			  
+			End Set
+		#tag EndSetter
 		GitFolder As FolderItem
 	#tag EndComputedProperty
+
+	#tag Property, Flags = &h21
+		Private LastStatus As String
+	#tag EndProperty
 
 	#tag Property, Flags = &h21
 		Private mGitFolder As FolderItem
