@@ -47,12 +47,12 @@ Protected Class Hunk
 		  //
 		  // Get the starting and ending indexes
 		  //
-		  rx.SearchPattern = "@@ -(\d+),(\d+) \+(\d+),(\d+)"
+		  rx.SearchPattern = "@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))?"
 		  match = rx.Search( hunkString )
 		  FromStartingLine = match.SubExpressionString( 1 ).ToInteger
-		  FromStartingLineCount = match.SubExpressionString( 2 ).ToInteger
+		  FromStartingLineCount = if( match.SubExpressionString( 2 ) <> "", match.SubExpressionString( 2 ).ToInteger , 1 )
 		  ToStartingLine = match.SubExpressionString( 3 ).ToInteger
-		  ToStartingLineCount = match.SubExpressionString( 4 ).ToInteger
+		  ToStartingLineCount = if( match.SubExpressionCount > 4 and match.SubExpressionString( 4 ) <> "", match.SubExpressionString( 4 ).ToInteger, 1 )
 		  
 		  //
 		  // Set the Source
@@ -284,6 +284,30 @@ Protected Class Hunk
 			Group="Behavior"
 			InitialValue=""
 			Type="String"
+			EditorType="MultiLineEditor"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="AfterChanges"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="String"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="BeforeChanges"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="String"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="FromStartingLine"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="Integer"
 			EditorType=""
 		#tag EndViewProperty
 	#tag EndViewBehavior
