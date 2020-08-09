@@ -62,6 +62,20 @@ Inherits Application
 	#tag EndMethod
 
 
+	#tag ComputedProperty, Flags = &h0
+		#tag Getter
+			Get
+			  var f as FolderItem = SpecialFolder.Temporary.Child( "gitmas" )
+			  if not f.Exists then
+			    f.CreateFolder
+			  end if
+			  return f
+			  
+			End Get
+		#tag EndGetter
+		TempFolder As FolderItem
+	#tag EndComputedProperty
+
 	#tag Property, Flags = &h0
 		WasAppOpenedWithDocument As Boolean
 	#tag EndProperty

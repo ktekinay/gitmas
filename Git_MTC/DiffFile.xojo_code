@@ -202,6 +202,30 @@ Protected Class DiffFile
 			Type="Integer"
 			EditorType=""
 		#tag EndViewProperty
+		#tag ViewProperty
+			Name="ChangedLineCount"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="Integer"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="ToPathSpec"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="String"
+			EditorType="MultiLineEditor"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="FromPathSpec"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="String"
+			EditorType="MultiLineEditor"
+		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class
 #tag EndClass

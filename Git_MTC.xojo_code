@@ -123,6 +123,12 @@ Protected Module Git_MTC
 	#tag Constant, Name = kCurrentBranch, Type = String, Dynamic = False, Default = \"branch --show-current", Scope = Private
 	#tag EndConstant
 
+	#tag Constant, Name = kGitAdd, Type = String, Dynamic = False, Default = \"add ", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = kGitApplyCached, Type = String, Dynamic = False, Default = \"apply --cached ", Scope = Private
+	#tag EndConstant
+
 	#tag Constant, Name = kGitCheckoutFile, Type = String, Dynamic = False, Default = \"checkout -- ", Scope = Private
 	#tag EndConstant
 
