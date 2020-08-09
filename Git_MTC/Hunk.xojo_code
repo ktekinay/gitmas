@@ -50,9 +50,9 @@ Protected Class Hunk
 		  rx.SearchPattern = "@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))?"
 		  match = rx.Search( hunkString )
 		  FromStartingLine = match.SubExpressionString( 1 ).ToInteger
-		  FromStartingLineCount = if( match.SubExpressionString( 2 ) <> "", match.SubExpressionString( 2 ).ToInteger , 1 )
+		  FromLineCount = if( match.SubExpressionString( 2 ) <> "", match.SubExpressionString( 2 ).ToInteger , 1 )
 		  ToStartingLine = match.SubExpressionString( 3 ).ToInteger
-		  ToStartingLineCount = if( match.SubExpressionCount > 4 and match.SubExpressionString( 4 ) <> "", match.SubExpressionString( 4 ).ToInteger, 1 )
+		  ToLineCount = if( match.SubExpressionCount > 4 and match.SubExpressionString( 4 ) <> "", match.SubExpressionString( 4 ).ToInteger, 1 )
 		  
 		  //
 		  // Set the Source
@@ -157,11 +157,11 @@ Protected Class Hunk
 	#tag EndComputedProperty
 
 	#tag Property, Flags = &h0
-		FromStartingLine As Integer
+		FromLineCount As Integer
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
-		FromStartingLineCount As Integer
+		FromStartingLine As Integer
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
@@ -210,11 +210,11 @@ Protected Class Hunk
 	#tag EndComputedProperty
 
 	#tag Property, Flags = &h0
-		ToStartingLine As Integer
+		ToLineCount As Integer
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
-		ToStartingLineCount As Integer
+		ToStartingLine As Integer
 	#tag EndProperty
 
 
@@ -260,7 +260,7 @@ Protected Class Hunk
 			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="FromStartingLineCount"
+			Name="FromLineCount"
 			Visible=false
 			Group="Behavior"
 			InitialValue=""
@@ -276,7 +276,7 @@ Protected Class Hunk
 			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="ToStartingLineCount"
+			Name="ToLineCount"
 			Visible=false
 			Group="Behavior"
 			InitialValue=""

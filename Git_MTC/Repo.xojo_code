@@ -45,30 +45,13 @@ Protected Class Repo
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Sub ExtractEOL(s As String)
-		  if EOL = "" then
-		    const kLF as string = &u0A
-		    const kCR as string = &u0D
-		    const kCRLF as string = kCR + kLF
-		    
-		    if s.IndexOf( kCRLF ) <> -1 then
-		      EOL = kCRLF
-		    elseif s.IndexOf( kLF ) <> -1 then
-		      EOL = kLF
-		    elseif s.IndexOf( kCR ) <> -1 then
-		      EOL = kCR
-		    end if
-		  end if
-		  
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h21
 		Private Sub GetDiffs()
 		  var diffString as string = GitIt( GitFolder, kGitDiff )
 		  System.DebugLog diffString
 		  
-		  ExtractEOL( diffString )
+		  if EOL = "" then
+		    EOL = ExtractEOL( diffString )
+		  end if
 		  diffString = diffString.ReplaceLineEndings( &u0A )
 		  diffString = &u0A + diffString
 		  
@@ -102,6 +85,10 @@ Protected Class Repo
 		  var result as integer = f1.NativePath.Compare( f2.NativePath, ComparisonOptions.CaseSensitive )
 		  
 		  if result = 0 then // Same file
+		    result = l1.Parent.FromStartingLine - l2.Parent.FromStartingLine
+		  end if
+		  
+		  if result = 0 then // Same hunk
 		    result = l1.DiffIndex - l2.DiffIndex
 		  end if
 		  
@@ -157,6 +144,138 @@ Protected Class Repo
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Sub ResetFileByHunks(df As Git_MTC.DiffFile, resetLines() As Git_MTC.DiffLine)
+		  //
+		  // The lines will be sorted by hunks
+		  //
+		  
+		  var hunks() as Git_MTC.Hunk
+		  
+		  for each line as Git_MTC.DiffLine in resetLines
+		    if hunks.Count = 0 or hunks( hunks.LastRowIndex ) <> line.Parent then
+		      hunks.AddRow( line.Parent )
+		    end if
+		  next
+		  
+		  //
+		  // Recreate the file and write it back
+		  //
+		  var tis as TextInputStream = TextInputStream.Open( df.ToFile )
+		  var source as string = tis.ReadAll( Encodings.UTF8 )
+		  tis.Close
+		  
+		  var eol as string = ExtractEOL( source, EndOfLine )
+		  
+		  var sourceLines() as string = source.Split( eol )
+		  
+		  //
+		  // For each hunk, we will remove the lines as they exist, then add them 
+		  // back from the hunk, adjusting for the ones that are being reverted
+		  //
+		  
+		  for hunkIndex as integer = hunks.LastRowIndex downto 0
+		    var hunk as Git_MTC.Hunk = hunks( hunkIndex )
+		    
+		    //
+		    // Make sure we are matching at the right place
+		    //
+		    var startingIndex as integer = hunk.ToStartingLine - 1
+		    for each line as Git_MTC.DiffLine in hunk.Lines
+		      if line.IsUnchanged or line.IsAddition then
+		        if sourceLines( line.ToLine - 1 ).Compare( line.Value, ComparisonOptions.CaseSensitive ) = 0 then
+		          //
+		          // Matched
+		          //
+		          exit for line
+		        else
+		          //
+		          // Some problem
+		          //
+		          raise new Git_MTC.GitException( "Could not find matching line during revert" )
+		        end if
+		      end if
+		    next
+		    
+		    //
+		    // Remove the existing lines from the source
+		    //
+		    for counter as integer = 1 to hunk.ToLineCount
+		      sourceLines.RemoveRowAt( startingIndex )
+		    next counter
+		    
+		    //
+		    // Add them back from the hunk
+		    //
+		    var sourceIndex as integer = startingIndex
+		    
+		    for each line as Git_MTC.DiffLine in hunk.Lines
+		      var isReset as boolean = _
+		      line.LineType <> Git_MTC.LineTypes.Unchanged and _
+		      resetLines.IndexOf( line ) <> -1
+		      
+		      if isReset = false or line.LineType = Git_MTC.LineTypes.Subtraction then
+		        //
+		        // Add it back
+		        //
+		        sourceLines.AddRowAt( sourceIndex, line.Value )
+		        sourceIndex = sourceIndex + 1
+		      end if
+		    next line
+		  next hunkIndex
+		  
+		  source = String.FromArray( sourceLines, eol )
+		  
+		  //
+		  // Backup the file
+		  //
+		  var backup as FolderItem = _
+		  df.ToFile.Parent.Child( df.ToFile.Name + "." + System.Microseconds.ToString( "##0" ) + ".bkup" )
+		  df.ToFile.CopyTo( backup )
+		  
+		  //
+		  // Overwrite the file
+		  //
+		  var orig as new FolderItem( df.ToFile ) // Refresh the properties
+		  var lastModified as Date = orig.ModificationDate
+		  
+		  var bs as BinaryStream
+		  
+		  try
+		    bs = BinaryStream.Open( df.ToFile, true )
+		    bs.BytePosition = 0 // Reset the contents
+		    bs.Write( source )
+		    bs.Close
+		    bs = nil
+		    
+		  catch err as IOException
+		    if bs isa object then
+		      bs.Close
+		      bs = nil
+		    end if
+		    
+		    //
+		    // Maybe restore the backup
+		    //
+		    var current as new FolderItem( df.ToFile )
+		    if current.ModificationDate.TotalSeconds <> lastModified.TotalSeconds then
+		      backup.CopyTo( df.ToFile )
+		    end if
+		    
+		    backup.Remove
+		    
+		    raise err
+		  end try
+		  
+		  //
+		  // Success, remove the backup
+		  //
+		  backup.Remove
+		  
+		  
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		Sub RevertLines(lines() As Git_MTC.DiffLine)
 		  //
@@ -180,10 +299,10 @@ Protected Class Repo
 		    
 		    var df as Git_MTC.DiffFile = line.Parent.Parent
 		    
-		    var arr() as Git_MTC.DiffLine
-		    arr = dict.Lookup( df, arr )
-		    arr.AddRow( line )
-		    dict.Value( df ) = arr
+		    var fileLines() as Git_MTC.DiffLine
+		    fileLines = dict.Lookup( df, fileLines )
+		    fileLines.AddRow( line )
+		    dict.Value( df ) = fileLines
 		  next
 		  
 		  //
@@ -194,16 +313,28 @@ Protected Class Repo
 		  var values() as variant = dict.Values
 		  for i as integer = 0 to keys.LastRowIndex
 		    var df as Git_MTC.DiffFile = keys( i )
-		    var arr() as Git_MTC.DiffLine = values( i )
+		    var fileLines() as Git_MTC.DiffLine = values( i )
 		    
-		    if df.ChangedLineCount = arr.Count then
+		    if df.ChangedLineCount = fileLines.Count then
 		      //
 		      // We can reset
 		      //
-		      ResetFile( df.ToPathSpec )
-		      dict.Remove( df )
+		      ResetFile( df.FromPathSpec )
+		      
+		      if df.ToPathSpec <> df.FromPathSpec and df.ToFile.Exists then
+		        df.ToFile.Remove
+		      end if
+		      
+		    else
+		      //
+		      // We have to cherry-pick lines out of files using the hunks
+		      //
+		      ResetFileByHunks( df, fileLines )
+		      
 		    end if
 		  next
+		  
+		  Refresh
 		  
 		End Sub
 	#tag EndMethod

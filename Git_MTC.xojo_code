@@ -1,6 +1,25 @@
 #tag Module
 Protected Module Git_MTC
 	#tag Method, Flags = &h21
+		Private Function ExtractEOL(s As String, default As String = "") As String
+		  const kLF as string = &u0A
+		  const kCR as string = &u0D
+		  const kCRLF as string = kCR + kLF
+		  
+		  if s.IndexOf( kCRLF ) <> -1 then
+		    return kCRLF
+		  elseif s.IndexOf( kLF ) <> -1 then
+		    return kLF
+		  elseif s.IndexOf( kCR ) <> -1 then
+		    return kCR
+		  end if
+		  
+		  return default
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
 		Private Function GitIt(repoPath As FolderItem, subcommand As String) As String
 		  var cmd as string
 		  #if TargetWindows then

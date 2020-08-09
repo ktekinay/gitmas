@@ -269,7 +269,7 @@ End
 		  for each df as Git_MTC.DiffFile in diffs
 		    for each hunk as Git_MTC.Hunk in df.Hunks
 		      for each dl as Git_MTC.DiffLine in hunk.Lines
-		        if dl.LineType = Git_MTC.LineTypes.Unchanged then
+		        if dl.IsUnchanged then
 		          //
 		          // Don't care
 		          //

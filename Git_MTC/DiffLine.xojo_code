@@ -31,6 +31,36 @@ Protected Class DiffLine
 		FromLine As Integer
 	#tag EndProperty
 
+	#tag ComputedProperty, Flags = &h0
+		#tag Getter
+			Get
+			  return LineType = Git_MTC.LineTypes.Addition
+			  
+			End Get
+		#tag EndGetter
+		IsAddition As Boolean
+	#tag EndComputedProperty
+
+	#tag ComputedProperty, Flags = &h0
+		#tag Getter
+			Get
+			  return LineType = Git_MTC.LineTypes.Subtraction
+			  
+			End Get
+		#tag EndGetter
+		IsSubtraction As Boolean
+	#tag EndComputedProperty
+
+	#tag ComputedProperty, Flags = &h0
+		#tag Getter
+			Get
+			  return LineType = Git_MTC.LineTypes.Unchanged
+			  
+			End Get
+		#tag EndGetter
+		IsUnchanged As Boolean
+	#tag EndComputedProperty
+
 	#tag Property, Flags = &h0
 		LineType As Git_MTC.LineTypes
 	#tag EndProperty
