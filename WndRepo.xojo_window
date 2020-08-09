@@ -94,7 +94,7 @@ Begin Window WndRepo
       Visible         =   True
       Width           =   409
    End
-   Begin Listbox LbLines
+   Begin DiffLineListbox LbLines
       AllowAutoDeactivate=   True
       AllowAutoHideScrollbars=   True
       AllowExpandableRows=   False
@@ -347,72 +347,6 @@ End
 #tag EndWindowCode
 
 #tag Events LbLines
-	#tag Event
-		Function CompareRows(row1 as Integer, row2 as Integer, column as Integer, ByRef result as Integer) As Boolean
-		  if column <> 1 then
-		    return false
-		  end if
-		  
-		  var arr1() as Git_MTC.DiffLine = me.RowTagAt( row1 )
-		  var arr2() as Git_MTC.DiffLine = me.RowTagAt( row2 )
-		  
-		  result = arr1.Count - arr2.Count
-		  
-		  if result = 0 then
-		    //
-		    // Let's see if these lines appear next to each other anywhere
-		    //
-		    for each dl1 as Git_MTC.DiffLine in arr1
-		      for each dl2 as Git_MTC.DiffLine in arr2
-		        if dl2.Parent = dl1.Parent then
-		          //
-		          // Same hunk
-		          //
-		          if dl1.LineType <> dl2.LineType then
-		            //
-		            // They are different line types, so we will list the subtraction before the addition
-		            //
-		            result = integer( dl2.LineType ) - integer( dl1.LineType )
-		          else
-		            //
-		            // Same type, so let's get the relative result
-		            //
-		            result = ( dl1.FromLine - dl2.FromLine ) + ( dl1.ToLine - dl2.ToLine )
-		          end if
-		          
-		          exit for dl1 // We're done
-		        end if
-		      next
-		    next
-		    
-		    //
-		    // If it's a reverse sort, we need to flip the result
-		    //
-		    if me.ColumnSortDirectionAt( 1 ) = ListBox.SortDirections.Descending then
-		      result = 0 - result
-		    end if
-		  end if
-		  
-		  if result = 0 then
-		    //
-		    // Couldn't find the result in any other way, so let's use the name
-		    //
-		    result = me.CellValueAt( row1, 0 ).Compare( me.CellValueAt( row2, 0 ) )
-		  end if
-		  
-		  return true
-		End Function
-	#tag EndEvent
-	#tag Event
-		Sub Open()
-		  me.SortingColumn = 1
-		  me.HeadingIndex = 1
-		  me.ColumnSortDirectionAt( 1 ) = ListBox.SortDirections.Descending
-		  
-		  me.ColumnAlignmentAt( 1 ) = ListBox.Alignments.Right
-		  
-		End Sub
-	#tag EndEvent
 	#tag Event
 		Sub Change()
 		  var isEnabled as boolean = me.SelectedRowCount <> 0
