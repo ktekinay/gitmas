@@ -10,20 +10,20 @@ Begin Window WndRepo
    HasFullScreenButton=   False
    HasMaximizeButton=   True
    HasMinimizeButton=   True
-   Height          =   400
+   Height          =   722
    ImplicitInstance=   True
    MacProcID       =   0
    MaximumHeight   =   32000
    MaximumWidth    =   32000
    MenuBar         =   1406697471
    MenuBarVisible  =   True
-   MinimumHeight   =   64
-   MinimumWidth    =   64
+   MinimumHeight   =   480
+   MinimumWidth    =   640
    Resizeable      =   True
    Title           =   "gitmas"
    Type            =   "0"
    Visible         =   True
-   Width           =   600
+   Width           =   958
    Begin Label Labels
       AllowAutoDeactivate=   True
       Bold            =   False
@@ -92,7 +92,7 @@ Begin Window WndRepo
       Underline       =   False
       Value           =   "Unknown"
       Visible         =   True
-      Width           =   457
+      Width           =   815
    End
    Begin DiffLineListbox LbLines
       AllowAutoDeactivate=   True
@@ -107,7 +107,7 @@ Begin Window WndRepo
       ColumnWidths    =   ",75"
       DataField       =   ""
       DataSource      =   ""
-      DefaultRowHeight=   -1
+      DefaultRowHeight=   20
       DropIndicatorVisible=   False
       Enabled         =   True
       FontName        =   "SmallSystem"
@@ -120,7 +120,7 @@ Begin Window WndRepo
       HasHorizontalScrollbar=   False
       HasVerticalScrollbar=   True
       HeadingIndex    =   -1
-      Height          =   222
+      Height          =   542
       Index           =   -2147483648
       InitialParent   =   ""
       InitialValue    =   "Line	Count"
@@ -129,7 +129,7 @@ Begin Window WndRepo
       LockBottom      =   True
       LockedInPosition=   False
       LockLeft        =   True
-      LockRight       =   True
+      LockRight       =   False
       LockTop         =   True
       RequiresSelection=   False
       RowSelectionType=   "1"
@@ -138,11 +138,11 @@ Begin Window WndRepo
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   103
+      Top             =   72
       Transparent     =   False
       Underline       =   False
       Visible         =   True
-      Width           =   560
+      Width           =   319
       _ScrollOffset   =   0
       _ScrollWidth    =   -1
    End
@@ -160,11 +160,11 @@ Begin Window WndRepo
       Index           =   -2147483648
       InitialParent   =   ""
       Italic          =   False
-      Left            =   500
+      Left            =   259
       LockBottom      =   True
       LockedInPosition=   False
-      LockLeft        =   False
-      LockRight       =   True
+      LockLeft        =   True
+      LockRight       =   False
       LockTop         =   False
       MacButtonStyle  =   "0"
       Scope           =   2
@@ -172,7 +172,7 @@ Begin Window WndRepo
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   337
+      Top             =   626
       Transparent     =   False
       Underline       =   False
       Visible         =   True
@@ -192,11 +192,11 @@ Begin Window WndRepo
       Index           =   -2147483648
       InitialParent   =   ""
       Italic          =   False
-      Left            =   408
+      Left            =   167
       LockBottom      =   True
       LockedInPosition=   False
-      LockLeft        =   False
-      LockRight       =   True
+      LockLeft        =   True
+      LockRight       =   False
       LockTop         =   False
       MacButtonStyle  =   "0"
       Scope           =   2
@@ -204,7 +204,7 @@ Begin Window WndRepo
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   337
+      Top             =   626
       Transparent     =   False
       Underline       =   False
       Visible         =   True
@@ -251,7 +251,59 @@ Begin Window WndRepo
       Underline       =   False
       Value           =   "Unknown"
       Visible         =   True
-      Width           =   560
+      Width           =   918
+   End
+   Begin DiffLineListbox LbLineFiles
+      AllowAutoDeactivate=   True
+      AllowAutoHideScrollbars=   True
+      AllowExpandableRows=   True
+      AllowFocusRing  =   True
+      AllowResizableColumns=   False
+      AllowRowDragging=   False
+      AllowRowReordering=   False
+      Bold            =   False
+      ColumnCount     =   3
+      ColumnWidths    =   "60,60"
+      DataField       =   ""
+      DataSource      =   ""
+      DefaultRowHeight=   20
+      DropIndicatorVisible=   False
+      Enabled         =   True
+      FontName        =   "SmallSystem"
+      FontSize        =   0.0
+      FontUnit        =   0
+      GridLinesHorizontalStyle=   "0"
+      GridLinesVerticalStyle=   "0"
+      HasBorder       =   True
+      HasHeader       =   False
+      HasHorizontalScrollbar=   False
+      HasVerticalScrollbar=   True
+      HeadingIndex    =   -1
+      Height          =   574
+      Index           =   -2147483648
+      InitialParent   =   ""
+      InitialValue    =   ""
+      Italic          =   False
+      Left            =   351
+      LockBottom      =   True
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   True
+      LockTop         =   True
+      RequiresSelection=   False
+      RowSelectionType=   "0"
+      Scope           =   2
+      TabIndex        =   6
+      TabPanelIndex   =   0
+      TabStop         =   True
+      Tooltip         =   ""
+      Top             =   72
+      Transparent     =   False
+      Underline       =   False
+      Visible         =   True
+      Width           =   587
+      _ScrollOffset   =   0
+      _ScrollWidth    =   -1
    End
 End
 #tag EndWindow
@@ -345,6 +397,79 @@ End
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Sub RefreshLineFiles()
+		  LbLineFiles.RemoveAllRows
+		  
+		  //
+		  // Get the selected lines
+		  //
+		  var lines() as M_Git.DiffLine
+		  for row as integer = 0 to LbLines.RowCount - 1
+		    if LbLines.Selected( row ) then
+		      var thisArr() as M_Git.DiffLine = LbLines.RowTagAt( row )
+		      for each line as M_Git.DiffLine in thisArr
+		        lines.AddRow line
+		      next
+		    end if
+		  next
+		  
+		  //
+		  // Split them up by hunks
+		  //
+		  var hunkDict as new Dictionary
+		  var hunks() as M_Git.Hunk
+		  
+		  for each line as M_Git.DiffLine in lines
+		    var hunk as M_Git.Hunk = line.Parent
+		    
+		    var lineArr() as M_Git.DiffLine
+		    if hunkDict.HasKey( hunk ) then
+		      lineArr = hunkDict.Value( hunk )
+		    else
+		      hunks.AddRow( hunk )
+		      hunkDict.Value( hunk ) = lineArr
+		    end if
+		    
+		    lineArr.AddRow( line )
+		  next
+		  
+		  //
+		  // Now split them up by files
+		  //
+		  var fileDict as new Dictionary
+		  var files() as M_Git.DiffFile
+		  
+		  for each hunk as M_Git.Hunk in hunks
+		    var file as M_Git.DiffFile = hunk.Parent
+		    
+		    var hunkArr() as M_Git.Hunk
+		    if fileDict.HasKey( file ) then
+		      hunkArr = fileDict.Value( file )
+		    else
+		      files.AddRow( file )
+		      fileDict.Value( file ) = hunkArr
+		    end if
+		    
+		    hunkArr.AddRow( hunk )
+		  next
+		  
+		  //
+		  // Fill in the listbox
+		  //
+		  for each file as M_Git.DiffFile in files
+		    LbLineFiles.AddExpandableRow( file.ToPathSpec )
+		    for col as integer = 1 to lbLineFiles.ColumnCount - 1
+		      LbLineFiles.CellValueAt( LbLineFiles.LastAddedRowIndex, col ) = file.ToPathSpec // Needs something so it will draw
+		    next
+		    
+		    LbLineFiles.RowTagAt( LbLineFiles.LastAddedRowIndex ) = fileDict.Value( file )
+		    LbLineFiles.CellTagAt( LbLineFiles.LastAddedRowIndex, 0 ) = file
+		  next
+		  
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		Sub Show(repoPath As FolderItem)
 		  Super.Show()
@@ -397,6 +522,17 @@ End
 		  var isEnabled as boolean = me.SelectedRowCount <> 0
 		  BtnStage.Enabled = isEnabled
 		  BtnRevert.Enabled = isEnabled
+		  RefreshLineFiles
+		  
+		End Sub
+	#tag EndEvent
+	#tag Event
+		Sub Open()
+		  me.SortingColumn = 1
+		  me.HeadingIndex = 1
+		  me.ColumnSortDirectionAt( 1 ) = ListBox.SortDirections.Descending
+		  
+		  me.ColumnAlignmentAt( 1 ) = ListBox.Alignments.Right
 		End Sub
 	#tag EndEvent
 #tag EndEvents
@@ -447,6 +583,73 @@ End
 		  
 		  
 		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events LbLineFiles
+	#tag Event
+		Sub ExpandRow(row As Integer)
+		  var hunks() as M_Git.Hunk = me.RowTagAt( row )
+		  
+		  for hunkIndex as integer = 0 to hunks.LastRowIndex
+		    var hunk as M_Git.Hunk = hunks( hunkIndex )
+		    
+		    for each line as M_Git.DiffLine in hunk.Lines
+		      me.AddRow( "" )
+		      if line.FromLine <> -1 then
+		        me.CellValueAt( me.LastAddedRowIndex, 0 ) = line.FromLine.ToString
+		      end if
+		      if line.ToLine <> -1 then
+		        me.CellValueAt( me.LastAddedRowIndex, 1 ) = line.ToLine.ToString
+		      end if
+		      me.CellValueAt( me.LastAddedRowIndex, 2 ) = line.Value
+		      me.RowTagAt( me.LastAddedRowIndex ) = line
+		      
+		      me.CellBorderLeftAt( me.LastAddedRowIndex, 2 ) = Listbox.Borders.ThinSolid
+		      me.CellAlignmentAt( me.LastAddedRowIndex, 0 ) = Listbox.Alignments.Right
+		      me.CellAlignmentAt( me.LastAddedRowIndex, 1 ) = Listbox.Alignments.Right
+		      me.CellAlignmentOffsetAt( me.LastAddedRowIndex, 2 ) = 15
+		    next
+		    
+		    if hunkIndex < hunks.LastRowIndex then
+		      me.AddRow "..."
+		    end if
+		  next
+		End Sub
+	#tag EndEvent
+	#tag Event
+		Function CellTextPaint(g As Graphics, row As Integer, column As Integer, x as Integer, y as Integer) As Boolean
+		  #pragma unused column
+		  #pragma unused x
+		  #pragma unused y
+		  
+		  if me.ExpandableRowAt( row ) then
+		    return true
+		  end if
+		  
+		  
+		End Function
+	#tag EndEvent
+	#tag Event
+		Function CellBackgroundPaint(g As Graphics, row As Integer, column As Integer) As Boolean
+		  const kBuffer as integer = 25
+		  const kHeightBuffer as integer = 4
+		  
+		  if row >= me.RowCount then
+		    return true
+		  end if
+		  
+		  if me.ExpandableRowAt( row ) then
+		    var spec as string = me.CellValueAt( row, 0 )
+		    
+		    g.Bold = true
+		    var startingX as integer = column * me.ColumnAt( 0 ).WidthActual
+		    
+		    g.DrawText( spec, 0 - startingX + kBuffer, g.Height - kHeightBuffer )
+		    return true
+		  end if
+		  
+		  
+		End Function
 	#tag EndEvent
 #tag EndEvents
 #tag ViewBehavior

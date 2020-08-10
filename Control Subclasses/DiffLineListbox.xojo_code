@@ -10,21 +10,39 @@ Inherits GitmasListbox
 		    return true
 		  end if
 		  
+		  var fontName as string = if( TargetWindows, "Monaco", "Monaco" )
+		  var fontSize as integer = 10
+		  
 		  var tag as variant = RowTagAt( row )
-		  if tag.IsArray then
+		  var sampleLine as M_Git.DiffLine
+		  
+		  if tag.IsArray and Introspection.GetType( tag ).Name = "DiffLine()" then
 		    var lines() as M_Git.DiffLine = tag
 		    if lines.Count <> 0 then
-		      var sampleLine as M_Git.DiffLine = lines( 0 )
-		      if sampleLine.IsAddition then
-		        g.DrawingColor = &c00BD0400
-		        g.Bold = true
-		        
-		      elseif sampleLine.IsSubtraction then
-		        g.DrawingColor = Color.Red
-		        g.Bold = true
-		        
-		      end if
+		      sampleLine = lines( 0 )
 		    end if
+		  elseif tag isa M_Git.DiffLine then
+		    sampleLine = tag
+		  end if
+		  
+		  if sampleLine is nil then
+		    //
+		    // Do nothing
+		    //
+		  else
+		    g.FontName = fontName
+		    g.FontSize = fontSize
+		    
+		    if sampleLine.IsAddition then
+		      g.DrawingColor = &c00BD0400
+		      g.Bold = true
+		      
+		    elseif sampleLine.IsSubtraction then
+		      g.DrawingColor = Color.Red
+		      g.Bold = true
+		      
+		    end if
+		    
 		  end if
 		  
 		  return false // Let Xojo draw the text
@@ -96,19 +114,6 @@ Inherits GitmasListbox
 		End Function
 	#tag EndEvent
 
-	#tag Event
-		Sub Open()
-		  self.SortingColumn = 1
-		  self.HeadingIndex = 1
-		  self.ColumnSortDirectionAt( 1 ) = ListBox.SortDirections.Descending
-		  
-		  self.ColumnAlignmentAt( 1 ) = ListBox.Alignments.Right
-		  
-		  RaiseEvent Open()
-		  
-		End Sub
-	#tag EndEvent
-
 
 	#tag Hook, Flags = &h0
 		Event CellTextPaint(g As Graphics, row As Integer, column As Integer, x as Integer, y as Integer) As Boolean
@@ -116,10 +121,6 @@ Inherits GitmasListbox
 
 	#tag Hook, Flags = &h0
 		Event CompareRows(row1 as Integer, row2 as Integer, column as Integer, ByRef result as Integer) As Boolean
-	#tag EndHook
-
-	#tag Hook, Flags = &h0
-		Event Open()
 	#tag EndHook
 
 
