@@ -16,7 +16,7 @@ Inherits GitmasListbox
 		    if lines.Count <> 0 then
 		      var sampleLine as Git_MTC.DiffLine = lines( 0 )
 		      if sampleLine.IsAddition then
-		        g.DrawingColor = Color.Green
+		        g.DrawingColor = &c00BD0400
 		        g.Bold = true
 		        
 		      elseif sampleLine.IsSubtraction then
