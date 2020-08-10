@@ -345,6 +345,10 @@ End
 		GitFolder As FolderItem
 	#tag EndComputedProperty
 
+	#tag Property, Flags = &h21
+		Private IsShowingError As Boolean
+	#tag EndProperty
+
 
 #tag EndWindowCode
 
@@ -379,6 +383,29 @@ End
 	#tag Event , Description = 546865206769742073746174757320686173206368616E6765642E
 		Sub Changed()
 		  RefreshFromRepo
+		  
+		End Sub
+	#tag EndEvent
+	#tag Event , Description = 5265706F727420616E20657863657074696F6E2074686174206F6363757272656420647572696E6720526566726573682E
+		Sub RefreshError(err As RuntimeException)
+		  if IsShowingError then
+		    return
+		  end if
+		  
+		  IsShowingError = true
+		  
+		  var ti as Introspection.TypeInfo = Introspection.GetType( err )
+		  var msg as string = "A " + ti.Name + " exception occurred while refreshing the repo"
+		  msg = msg.Trim
+		  
+		  var button as string = GuiHelpers.QuickRequestDialog( self, msg, err.Message, "Close", "Try Again" )
+		  
+		  if button = "Close" then
+		    self.Close
+		  end if
+		  
+		  IsShowingError = false
+		  
 		  
 		End Sub
 	#tag EndEvent
