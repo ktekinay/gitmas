@@ -258,7 +258,7 @@ Protected Class Repo
 		    CheckStatusTimer.Reset
 		    
 		    try
-		      var currentStatus as string = M_Git.GitIt( GitFolder, M_Git.kGitStatus )
+		      var currentStatus as string = M_Git.GitIt( GitFolder, M_Git.kGitStatus ) + &uA + GitFolder.NativePath
 		      
 		      if currentStatus.Compare( LastStatus, ComparisonOptions.CaseSensitive ) <> 0 then
 		        //
@@ -583,13 +583,22 @@ Protected Class Repo
 	#tag ComputedProperty, Flags = &h0
 		#tag Getter
 			Get
-			  return mGitFolder
+			  if mGitFolderSaveInfo = "" then
+			    return nil
+			  else
+			    return new FolderItem( mGitFolderSaveInfo )
+			  end if
 			End Get
 		#tag EndGetter
 		#tag Setter
 			Set
-			  mGitFolder = value
-			  Refresh
+			  if value is nil then
+			    mGitFolderSaveInfo = ""
+			  else
+			    mGitFolderSaveInfo = value.SaveInfo( nil )
+			    Refresh
+			  end if
+			  
 			  
 			End Set
 		#tag EndSetter
@@ -601,7 +610,7 @@ Protected Class Repo
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
-		Private mGitFolder As FolderItem
+		Private mGitFolderSaveInfo As String
 	#tag EndProperty
 
 
