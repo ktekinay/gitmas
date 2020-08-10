@@ -62,6 +62,14 @@ Protected Class Repo
 		  builder.AddRow( "--- a/" + df.FromPathSpec + &u09 )
 		  builder.AddRow( "+++ b/" + df.ToPathSpec + &u09 )
 		  
+		  //
+		  // We need a running count of the differences
+		  // so we can adjust the starting "to" line number
+		  // in the header
+		  //
+		  var previousCountDiff as integer
+		  var countDiff as integer
+		  
 		  for each hunk as Git_MTC.Hunk in hunks
 		    //
 		    // Record the header index, we'll build it later
@@ -81,14 +89,16 @@ Protected Class Repo
 		        toCount = toCount + 1
 		        
 		      else
-		        var isIncluded as boolean = lines.IndexOf( hunkLine ) <> 0
+		        var isIncluded as boolean = lines.IndexOf( hunkLine ) <> -1
 		        
 		        if isIncluded then
 		          builder.AddRow( hunkLine.Symbol + hunkLine.Value )
 		          if hunkLine.IsAddition then
 		            toCount = toCount + 1
+		            countDiff = countDiff + 1
 		          else //Subtraction
 		            fromCount = fromCount + 1
+		            countDiff = countDiff - 1
 		          end if
 		          
 		        elseif hunkLine.IsSubtraction then 
@@ -107,10 +117,13 @@ Protected Class Repo
 		    //
 		    // Now build the header
 		    //
+		    var toStartingLine as integer = hunk.FromStartingLine + previousCountDiff
 		    var header as string = "@@ -" + hunk.FromStartingLine.ToString + "," + fromCount.ToString
-		    header = header + " +" + hunk.ToStartingLine.ToString + "," + toCount.ToString
+		    header = header + " +" + toStartingLine.ToString + "," + toCount.ToString
 		    header = header + " @@"
 		    builder( headerIndex ) = header
+		    
+		    previousCountDiff = countDiff
 		  next
 		  
 		  var diff as string = String.FromArray( builder, EndOfLine ) + EndOfLine
@@ -500,7 +513,7 @@ Protected Class Repo
 		      StageFileWithoutRefresh( df )
 		      
 		    else
-		      var diffString as string = GenerateDiffForLines( df, lines )
+		      var diffString as string = GenerateDiffForLines( df, fileLines )
 		      var diffFile as FolderItem = App.TempFolder.Child( "stagelines.diff" )
 		      var tos as TextOutputStream = TextOutputStream.Create( diffFile )
 		      tos.Write( diffString )
