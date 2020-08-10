@@ -30,7 +30,7 @@ Begin Window WndRepo
       DataField       =   ""
       DataSource      =   ""
       Enabled         =   True
-      FontName        =   "System"
+      FontName        =   "SmallSystem"
       FontSize        =   0.0
       FontUnit        =   0
       Height          =   20
@@ -52,12 +52,12 @@ Begin Window WndRepo
       TextAlignment   =   "0"
       TextColor       =   &c00000000
       Tooltip         =   ""
-      Top             =   20
+      Top             =   30
       Transparent     =   False
       Underline       =   False
       Value           =   "Current Branch:"
       Visible         =   True
-      Width           =   121
+      Width           =   102
    End
    Begin Label LblCurrentBranch
       AllowAutoDeactivate=   True
@@ -65,14 +65,14 @@ Begin Window WndRepo
       DataField       =   ""
       DataSource      =   ""
       Enabled         =   True
-      FontName        =   "System"
+      FontName        =   "SmallSystem"
       FontSize        =   0.0
       FontUnit        =   0
       Height          =   20
       Index           =   -2147483648
       InitialParent   =   ""
       Italic          =   False
-      Left            =   171
+      Left            =   123
       LockBottom      =   False
       LockedInPosition=   False
       LockLeft        =   True
@@ -87,12 +87,12 @@ Begin Window WndRepo
       TextAlignment   =   "0"
       TextColor       =   &c00000000
       Tooltip         =   ""
-      Top             =   20
+      Top             =   30
       Transparent     =   False
       Underline       =   False
       Value           =   "Unknown"
       Visible         =   True
-      Width           =   409
+      Width           =   457
    End
    Begin DiffLineListbox LbLines
       AllowAutoDeactivate=   True
@@ -218,6 +218,41 @@ Begin Window WndRepo
       Scope           =   2
       TabPanelIndex   =   0
    End
+   Begin Label LblRepoPath
+      AllowAutoDeactivate=   True
+      Bold            =   True
+      DataField       =   ""
+      DataSource      =   ""
+      Enabled         =   True
+      FontName        =   "SmallSystem"
+      FontSize        =   0.0
+      FontUnit        =   0
+      Height          =   20
+      Index           =   -2147483648
+      InitialParent   =   ""
+      Italic          =   False
+      Left            =   20
+      LockBottom      =   False
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   True
+      LockTop         =   True
+      Multiline       =   False
+      Scope           =   2
+      Selectable      =   False
+      TabIndex        =   5
+      TabPanelIndex   =   0
+      TabStop         =   True
+      TextAlignment   =   "0"
+      TextColor       =   &c00000000
+      Tooltip         =   ""
+      Top             =   8
+      Transparent     =   False
+      Underline       =   False
+      Value           =   "Unknown"
+      Visible         =   True
+      Width           =   560
+   End
 End
 #tag EndWindow
 
@@ -260,6 +295,7 @@ End
 		    return
 		  end if
 		  
+		  lblRepoPath.Value = MyRepo.GitFolder.NativePath
 		  lblCurrentBranch.Value = MyRepo.CurrentBranch
 		  var diffs() as M_Git.DiffFile = MyRepo.Diffs
 		  
@@ -292,15 +328,18 @@ End
 		  //
 		  // Fill in the listbox
 		  //
+		  var lbLinesScrollPosition as integer = LbLines.ScrollPosition
+		  
 		  LbLines.RemoveAllRows
 		  for each key as string in lineDict.Keys
 		    var arr() as M_Git.DiffLine = lineDict.Value( key )
-		    LbLines.AddRow( key ) // Remove the indicator
+		    LbLines.AddRow( key.Middle( 1 ) ) // Remove the indicator
 		    LbLines.CellValueAt( LbLines.LastRowIndex, 1 ) = arr.Count.ToString
 		    lbLines.RowTagAt( LbLines.LastRowIndex ) = arr
 		  next
 		  
 		  LbLines.Sort
+		  LbLines.ScrollPosition = lbLinesScrollPosition
 		  
 		  return
 		End Sub
