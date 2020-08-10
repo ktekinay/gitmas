@@ -211,6 +211,8 @@ Begin Window WndRepo
       Width           =   80
    End
    Begin Git_MTC.Repo MyRepo
+      CurrentBranch   =   ""
+      EOL             =   ""
       Index           =   -2147483648
       LockedInPosition=   False
       Scope           =   2

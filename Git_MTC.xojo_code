@@ -23,9 +23,9 @@ Protected Module Git_MTC
 		Private Function GitIt(repoPath As FolderItem, subcommand As String) As String
 		  var cmd as string
 		  #if TargetWindows then
-		    cmd = "chdir """ + repoPath.NativePath + """ && "
+		    cmd = "chdir " + ShellSafe( repoPath.NativePath ) + " && "
 		  #else
-		    cmd = "cd '" + repoPath.NativePath.ReplaceAll( "'", "'\''" ) + "' && "
+		    cmd = "cd " + ShellSafe( repoPath.NativePath ) + " && "
 		  #endif
 		  
 		  cmd = cmd + GitCommand + subcommand
@@ -38,9 +38,13 @@ Protected Module Git_MTC
 		  else
 		    System.DebugLog( "...FAILED (" + sh.ExitCode.ToString + ")" )
 		  end if
+		  
+		  var result as string = sh.Result.DefineEncoding( Encodings.UTF8 ).Trim
+		  System.DebugLog( result )
+		  
 		  MaybeExceptionFromShell( "Error executing git command " + subcommand, sh )
 		  
-		  return sh.Result.DefineEncoding( Encodings.UTF8 ).Trim
+		  return result
 		  
 		End Function
 	#tag EndMethod
@@ -87,6 +91,31 @@ Protected Module Git_MTC
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Function ShellSafe(s As String) As String
+		  //
+		  // Makes a string shell-safe
+		  //
+		  
+		  #if TargetWindows then
+		    
+		    const kQuote as string = """"
+		    
+		    s = kQuote + s.ReplaceAll( kQuote, "\" + kQuote ) + kQuote
+		    
+		  #else
+		    
+		    const kQuote as string = "'"
+		    
+		    s = kQuote + s.ReplaceAll( kQuote, kQuote + "\'" + kQuote ) + kQuote
+		    
+		  #endif
+		  
+		  return s
+		  
+		End Function
+	#tag EndMethod
+
 
 	#tag Property, Flags = &h21
 		Private GitCommand As String
@@ -101,7 +130,7 @@ Protected Module Git_MTC
 		#tag Setter
 			Set
 			  mGitCommandPath = value
-			  GitCommand = "'" + value.Trim.ReplaceAll( "'", "'\''" ) + "' " + kGitOptions + " "
+			  GitCommand = ShellSafe( value ) + " " + kGitOptions + " "
 			  
 			End Set
 		#tag EndSetter

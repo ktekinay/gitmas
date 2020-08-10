@@ -6,6 +6,7 @@ Protected Class Repo
 		    sender.RunMode = Timer.RunModes.Off
 		  else
 		    sender.RunMode = Timer.RunModes.Multiple
+		    
 		    Refresh
 		  end if
 		  
@@ -146,9 +147,14 @@ Protected Class Repo
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Sub GetDiffs()
-		  var diffString as string = GitIt( GitFolder, kGitDiff )
-		  System.DebugLog diffString
+		Private Function GetDiffs(staged As Boolean) As Git_MTC.DiffFile()
+		  var diffString as string
+		  if staged then
+		    diffString = GitIt( GitFolder, kGitDiff + "--staged " )
+		  else
+		    diffString = GitIt( GitFolder, kGitDiff )
+		  end if
+		  
 		  
 		  if EOL = "" then
 		    EOL = ExtractEOL( diffString )
@@ -168,14 +174,9 @@ Protected Class Repo
 		    diffs.AddRow new DiffFile( self, part )
 		  next
 		  
-		  self.Diffs.RemoveAllRows
-		  for each df as DiffFile in diffs
-		    self.Diffs.AddRow( df )
-		  next
+		  return diffs
 		  
-		  self.Diffs = diffs
-		  
-		End Sub
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
@@ -256,24 +257,36 @@ Protected Class Repo
 		    CheckStatusTimer.RunMode = Timer.RunModes.Multiple
 		    CheckStatusTimer.Reset
 		    
-		    var currentStatus as string = Git_MTC.GitIt( GitFolder, Git_MTC.kGitStatus )
+		    try
+		      var currentStatus as string = Git_MTC.GitIt( GitFolder, Git_MTC.kGitStatus )
+		      
+		      if currentStatus.Compare( LastStatus, ComparisonOptions.CaseSensitive ) <> 0 then
+		        //
+		        // Get the current data
+		        //
+		        self.Diffs = GetDiffs( false )
+		        self.DiffsStaged = GetDiffs( true )
+		        
+		        //
+		        // Store the current status
+		        //
+		        LastStatus = currentStatus
+		        
+		        //
+		        // Let the caller know
+		        //
+		        RaiseEvent Changed
+		      end if
+		      
+		    catch err as RuntimeException
+		      if err isa EndException or err isa ThreadEndException then
+		        raise err
+		      end if
+		      
+		      RaiseEvent RefreshError( err )
+		      
+		    end try
 		    
-		    if currentStatus.Compare( LastStatus, ComparisonOptions.CaseSensitive ) <> 0 then
-		      //
-		      // Get the current data
-		      //
-		      GetDiffs
-		      
-		      //
-		      // Store the current status
-		      //
-		      LastStatus = currentStatus
-		      
-		      //
-		      // Let the caller know
-		      //
-		      RaiseEvent Changed
-		    end if
 		  end if
 		  
 		End Sub
@@ -414,14 +427,7 @@ Protected Class Repo
 
 	#tag Method, Flags = &h21
 		Private Sub ResetFileWithoutRefresh(df As Git_MTC.DiffFile)
-		  var path as string = df.FromPathSpec
-		  
-		  #if TargetWindows then
-		    path = """" + path + """"
-		  #else
-		    path = "'" + path.ReplaceAll( "'", "'\''" ) + "'"
-		  #endif
-		  
+		  var path as string = ShellSafe( df.FromPathSpec )
 		  call Git_MTC.GitIt( GitFolder, Git_MTC.kGitCheckoutFile + path )
 		  
 		  if df.ToFile.Exists and df.FromFile.Exists and _
@@ -483,7 +489,7 @@ Protected Class Repo
 
 	#tag Method, Flags = &h21
 		Private Sub StageFileWithoutRefresh(df As Git_MTC.DiffFile)
-		  call GitIt( df.Parent.GitFolder, Git_MTC.kGitAdd + "'" + df.ToPathSpec.ReplaceAll( "'", "'\''" ) + "'" )
+		  call GitIt( df.Parent.GitFolder, Git_MTC.kGitAdd + ShellSafe( df.ToPathSpec ) )
 		  
 		End Sub
 	#tag EndMethod
@@ -519,7 +525,7 @@ Protected Class Repo
 		      tos.Write( diffString )
 		      tos.Close
 		      
-		      call GitIt( GitFolder, Git_MTC.kGitApplyCached + "'" + diffFile.NativePath.ReplaceAll( "'", "'\''" ) + "'" )
+		      call GitIt( GitFolder, Git_MTC.kGitApplyCached + ShellSafe( diffFile.NativePath ) )
 		      
 		      diffFile.Remove
 		    end if
@@ -533,6 +539,10 @@ Protected Class Repo
 
 	#tag Hook, Flags = &h0, Description = 546865206769742073746174757320686173206368616E6765642E
 		Event Changed()
+	#tag EndHook
+
+	#tag Hook, Flags = &h0, Description = 5265706F727420616E20657863657074696F6E2074686174206F6363757272656420647572696E6720526566726573682E
+		Event RefreshError(err As RuntimeException)
 	#tag EndHook
 
 
@@ -549,7 +559,9 @@ Protected Class Repo
 		#tag EndGetter
 		#tag Setter
 			Set
-			  call GitIt( GitFolder, kCheckout + " " + value )
+			  if value <> "" and GitFolder isa object then
+			    call GitIt( GitFolder, kCheckout + " " + value )
+			  end if
 			  
 			End Set
 		#tag EndSetter
@@ -558,6 +570,10 @@ Protected Class Repo
 
 	#tag Property, Flags = &h0
 		Diffs() As Git_MTC.DiffFile
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		DiffsStaged() As Git_MTC.DiffFile
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
