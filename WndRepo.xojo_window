@@ -210,7 +210,7 @@ Begin Window WndRepo
       Visible         =   True
       Width           =   80
    End
-   Begin Git_MTC.Repo MyRepo
+   Begin M_Git.Repo MyRepo
       CurrentBranch   =   ""
       EOL             =   ""
       Index           =   -2147483648
@@ -233,13 +233,13 @@ End
 
 
 	#tag Method, Flags = &h21
-		Private Function GetSelectedLines() As Git_MTC.DiffLine()
-		  var arr() as Git_MTC.DiffLine
+		Private Function GetSelectedLines() As M_Git.DiffLine()
+		  var arr() as M_Git.DiffLine
 		  
 		  for row as integer = 0 to LbLines.RowCount - 1
 		    if LbLines.Selected( row ) then
-		      var rowArr() as Git_MTC.DiffLine = LbLines.RowTagAt( row )
-		      for each dl as Git_MTC.DiffLine in rowArr
+		      var rowArr() as M_Git.DiffLine = LbLines.RowTagAt( row )
+		      for each dl as M_Git.DiffLine in rowArr
 		        arr.AddRow dl
 		      next
 		    end if
@@ -261,16 +261,16 @@ End
 		  end if
 		  
 		  lblCurrentBranch.Value = MyRepo.CurrentBranch
-		  var diffs() as Git_MTC.DiffFile = MyRepo.Diffs
+		  var diffs() as M_Git.DiffFile = MyRepo.Diffs
 		  
 		  //
 		  // Harvest the lines
 		  //
 		  var lineDict as new Dictionary
 		  
-		  for each df as Git_MTC.DiffFile in diffs
-		    for each hunk as Git_MTC.Hunk in df.Hunks
-		      for each dl as Git_MTC.DiffLine in hunk.Lines
+		  for each df as M_Git.DiffFile in diffs
+		    for each hunk as M_Git.Hunk in df.Hunks
+		      for each dl as M_Git.DiffLine in hunk.Lines
 		        if dl.IsUnchanged then
 		          //
 		          // Don't care
@@ -281,7 +281,7 @@ End
 		        var indicator as string = dl.Symbol
 		        var key as string = indicator + dl.Value.Trim // 0, 1, or 2 to indicate type
 		        
-		        var arr() as Git_MTC.DiffLine 
+		        var arr() as M_Git.DiffLine 
 		        arr = lineDict.Lookup( key, arr )
 		        arr.Append( dl )
 		        lineDict.Value( key ) = arr
@@ -294,7 +294,7 @@ End
 		  //
 		  LbLines.RemoveAllRows
 		  for each key as string in lineDict.Keys
-		    var arr() as Git_MTC.DiffLine = lineDict.Value( key )
+		    var arr() as M_Git.DiffLine = lineDict.Value( key )
 		    LbLines.AddRow( key ) // Remove the indicator
 		    LbLines.CellValueAt( LbLines.LastRowIndex, 1 ) = arr.Count.ToString
 		    lbLines.RowTagAt( LbLines.LastRowIndex ) = arr
@@ -313,7 +313,7 @@ End
 		  try
 		    MyRepo.GitFolder = repoPath
 		    
-		  catch err as Git_MTC.GitException
+		  catch err as M_Git.GitException
 		    MessageBox "This does not appear to be a git repo"
 		    Close
 		    return
@@ -325,7 +325,7 @@ End
 
 	#tag Method, Flags = &h21
 		Private Sub StageSelectedLines()
-		  var selected() as Git_MTC.DiffLine = GetSelectedLines
+		  var selected() as M_Git.DiffLine = GetSelectedLines
 		  MyRepo.StageLines( selected )
 		  
 		  

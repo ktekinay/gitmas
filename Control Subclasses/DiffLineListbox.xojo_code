@@ -12,9 +12,9 @@ Inherits GitmasListbox
 		  
 		  var tag as variant = RowTagAt( row )
 		  if tag.IsArray then
-		    var lines() as Git_MTC.DiffLine = tag
+		    var lines() as M_Git.DiffLine = tag
 		    if lines.Count <> 0 then
-		      var sampleLine as Git_MTC.DiffLine = lines( 0 )
+		      var sampleLine as M_Git.DiffLine = lines( 0 )
 		      if sampleLine.IsAddition then
 		        g.DrawingColor = &c00BD0400
 		        g.Bold = true
@@ -45,8 +45,8 @@ Inherits GitmasListbox
 		    return false
 		  end if
 		  
-		  var arr1() as Git_MTC.DiffLine = self.RowTagAt( row1 )
-		  var arr2() as Git_MTC.DiffLine = self.RowTagAt( row2 )
+		  var arr1() as M_Git.DiffLine = self.RowTagAt( row1 )
+		  var arr2() as M_Git.DiffLine = self.RowTagAt( row2 )
 		  
 		  result = arr1.Count - arr2.Count
 		  
@@ -54,8 +54,8 @@ Inherits GitmasListbox
 		    //
 		    // Let's see if these lines appear next to each other anywhere
 		    //
-		    for each dl1 as Git_MTC.DiffLine in arr1
-		      for each dl2 as Git_MTC.DiffLine in arr2
+		    for each dl1 as M_Git.DiffLine in arr1
+		      for each dl2 as M_Git.DiffLine in arr2
 		        if dl2.Parent = dl1.Parent then
 		          //
 		          // Same hunk

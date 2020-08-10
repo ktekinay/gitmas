@@ -1,5 +1,5 @@
 #tag Module
-Protected Module Git_MTC
+Protected Module M_Git
 	#tag Method, Flags = &h21
 		Private Function ExtractEOL(s As String, default As String = "") As String
 		  const kLF as string = &u0A
