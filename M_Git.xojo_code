@@ -61,11 +61,18 @@ Protected Module M_Git
 		  if GitCommandPath = "" then
 		    #if not TargetWindows then
 		      var sh as new Shell
-		      sh.Execute "which git"
+		      sh.Execute( "echo $SHELL" )
+		      MaybeExceptionFromShell( "Could not identify shell", sh )
+		      
+		      var shellPath as string = sh.Result.DefineEncoding( Encodings.UTF8 ).Trim
+		      sh.Execute( shellPath + " -lc 'which git'" )
 		      MaybeExceptionFromShell( "Error finding git command", sh )
 		      
 		      GitCommandPath = sh.Result.DefineEncoding( Encodings.UTF8 ).Trim
+		      GitCommandPath = GitCommandPath.ReplaceLineEndings( &uA )
+		      GitCommandPath = GitCommandPath.NthField( &uA, GitCommandPath.CountFields( &uA ) )
 		    #endif
+		    System.DebugLog( "Using git from " + GitCommandPath )
 		  end if
 		  
 		  WasInited = true
