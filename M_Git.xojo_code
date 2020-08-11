@@ -156,9 +156,6 @@ Protected Module M_Git
 	#tag Constant, Name = kCheckout, Type = String, Dynamic = False, Default = \"checkout", Scope = Private
 	#tag EndConstant
 
-	#tag Constant, Name = kCurrentBranch, Type = String, Dynamic = False, Default = \"branch --show-current", Scope = Private
-	#tag EndConstant
-
 	#tag Constant, Name = kGitAdd, Type = String, Dynamic = False, Default = \"add ", Scope = Private
 	#tag EndConstant
 

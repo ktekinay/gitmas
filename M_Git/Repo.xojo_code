@@ -553,7 +553,18 @@ Protected Class Repo
 	#tag ComputedProperty, Flags = &h0
 		#tag Getter
 			Get
-			  return GitIt( GitFolder, kCurrentBranch )
+			  static rx as RegEx
+			  if rx is nil then
+			    rx = new RegEx
+			    rx.SearchPattern = "^On branch (.*)"
+			  end if
+			  
+			  if LastStatus <> "" then
+			    var match as RegExMatch = rx.Search( LastStatus )
+			    if match isa RegExMatch then
+			      return match.SubExpressionString( 1 )
+			    end if
+			  end if
 			  
 			End Get
 		#tag EndGetter
