@@ -343,11 +343,11 @@ End
 		  // Refresh the current data from the repo
 		  //
 		  
-		  if MyRepo.GitFolder is nil then
+		  if GitFolder is nil then
 		    return
 		  end if
 		  
-		  lblRepoPath.Value = MyRepo.GitFolder.NativePath
+		  lblRepoPath.Value = GitFolder.NativePath
 		  lblCurrentBranch.Value = MyRepo.CurrentBranch
 		  var diffs() as M_Git.DiffFile = MyRepo.Diffs
 		  
@@ -618,6 +618,7 @@ End
 	#tag EndEvent
 	#tag Event
 		Function CellTextPaint(g As Graphics, row As Integer, column As Integer, x as Integer, y as Integer) As Boolean
+		  #pragma unused g
 		  #pragma unused column
 		  #pragma unused x
 		  #pragma unused y
