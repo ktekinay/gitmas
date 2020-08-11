@@ -641,8 +641,8 @@ End
 		  if me.ExpandableRowAt( row ) then
 		    var spec as string = me.CellValueAt( row, 0 )
 		    
-		    g.FontName = "SmallSystem"
-		    g.FontSize = 0
+		    g.FontName = me.FontName
+		    g.FontSize = me.FontSize
 		    g.Bold = true
 		    var startingX as integer = column * me.ColumnAt( 0 ).WidthActual
 		    
