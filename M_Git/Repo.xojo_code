@@ -392,7 +392,8 @@ Protected Class Repo
 		  
 		  try
 		    bs = BinaryStream.Open( df.ToFile, true )
-		    bs.BytePosition = 0 // Reset the contents
+		    bs.BytePosition = 0
+		    bs.Length = 0 // Reset the contents
 		    bs.Write( source )
 		    bs.Close
 		    bs = nil
