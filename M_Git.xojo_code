@@ -5,9 +5,12 @@ Protected Module M_Git
 		  const kLF as string = &u0A
 		  const kCR as string = &u0D
 		  const kCRLF as string = kCR + kLF
+		  const kLFCR as string = kLF + kCR // Just covering the bases
 		  
 		  if s.IndexOf( kCRLF ) <> -1 then
 		    return kCRLF
+		  elseif s.IndexOf( kLFCR ) <> -1 then
+		    return kLFCR
 		  elseif s.IndexOf( kLF ) <> -1 then
 		    return kLF
 		  elseif s.IndexOf( kCR ) <> -1 then
