@@ -181,7 +181,8 @@ Protected Module M_Git
 	#tag Enum, Name = LineTypes, Type = Integer, Flags = &h1
 		Unchanged
 		  Addition
-		Subtraction
+		  Subtraction
+		NoTrailingNewline
 	#tag EndEnum
 
 

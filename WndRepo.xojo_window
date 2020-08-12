@@ -359,7 +359,7 @@ End
 		  for each df as M_Git.DiffFile in diffs
 		    for each hunk as M_Git.Hunk in df.Hunks
 		      for each dl as M_Git.DiffLine in hunk.Lines
-		        if dl.IsUnchanged then
+		        if dl.IsUnchanged or dl.LineType = M_Git.LineTypes.NoTrailingNewline then
 		          //
 		          // Don't care
 		          //

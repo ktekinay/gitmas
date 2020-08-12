@@ -14,6 +14,8 @@ Protected Class DiffLine
 		    LineType = M_Git.LineTypes.Addition
 		  case "-"
 		    LineType = M_Git.LineTypes.Subtraction
+		  case "\" 
+		    LineType = M_Git.LineTypes.NoTrailingNewline
 		  case else
 		    raise new GitException( "Could not determine line type of '" + line + "'" )
 		  end select
@@ -103,6 +105,8 @@ Protected Class DiffLine
 			    return "+"
 			  case M_Git.LineTypes.Subtraction
 			    return "-"
+			  case M_Git.LineTypes.NoTrailingNewline
+			    return "\"
 			  end select
 			End Get
 		#tag EndGetter
@@ -164,7 +168,7 @@ Protected Class DiffLine
 			Visible=false
 			Group="Behavior"
 			InitialValue=""
-			Type="Git_MTC.LineTypes"
+			Type="M_Git.LineTypes"
 			EditorType="Enum"
 			#tag EnumValues
 				"0 - Unchanged"
