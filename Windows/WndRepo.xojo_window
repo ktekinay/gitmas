@@ -393,7 +393,7 @@ End
 		        end if
 		        
 		        var indicator as string = dl.Symbol
-		        var key as string = indicator + dl.Value.Trim // 0, 1, or 2 to indicate type
+		        var key as string = indicator + dl.Value.Trim 
 		        
 		        var arr() as M_Git.DiffLine 
 		        arr = lineDict.Lookup( key, arr )
@@ -703,12 +703,16 @@ End
 		    
 		    for each line as M_Git.DiffLine in hunk.Lines
 		      me.AddRow( "" )
-		      if line.FromLine <> -1 then
-		        me.CellValueAt( me.LastAddedRowIndex, 0 ) = line.FromLine.ToString
+		      
+		      if line.LineType <> M_Git.LineTypes.NoTrailingNewline then
+		        if line.FromLine <> -1 then
+		          me.CellValueAt( me.LastAddedRowIndex, 0 ) = line.FromLine.ToString
+		        end if
+		        if line.ToLine <> -1 then
+		          me.CellValueAt( me.LastAddedRowIndex, 1 ) = line.ToLine.ToString
+		        end if
 		      end if
-		      if line.ToLine <> -1 then
-		        me.CellValueAt( me.LastAddedRowIndex, 1 ) = line.ToLine.ToString
-		      end if
+		      
 		      me.CellValueAt( me.LastAddedRowIndex, 2 ) = line.Value
 		      me.RowTagAt( me.LastAddedRowIndex ) = line
 		      

@@ -81,13 +81,15 @@ Protected Class Repo
 		    var fromCount as integer
 		    
 		    for each hunkLine as M_Git.DiffLine in hunk.Lines
-		      if hunkLine.IsUnchanged then
+		      if hunkLine.IsUnchanged or hunkLine.LineType = M_Git.LineTypes.NoTrailingNewline then
 		        //
 		        // We add it regardless if it's included
 		        //
 		        builder.AddRow( hunkLine.Symbol + hunkLine.Value )
-		        fromCount = fromCount + 1
-		        toCount = toCount + 1
+		        if hunkLine.LineType <> M_Git.LineTypes.NoTrailingNewline then
+		          fromCount = fromCount + 1
+		          toCount = toCount + 1
+		        end if
 		        
 		      else
 		        var isIncluded as boolean = lines.IndexOf( hunkLine ) <> -1
@@ -228,7 +230,7 @@ Protected Class Repo
 		  var dict as new Dictionary
 		  
 		  for each line as M_Git.DiffLine in lines
-		    if line.LineType = M_Git.LineTypes.Unchanged then
+		    if line.IsUnchanged or line.LineType = M_Git.LineTypes.NoTrailingNewline then
 		      //
 		      // Don't care
 		      //

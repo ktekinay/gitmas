@@ -27,7 +27,7 @@ Inherits GitmasListbox
 		    return true
 		  end if
 		  
-		  var fontName as string = if( TargetWindows, "Courier", "Monaco" )
+		  var fontName as string = if( TargetWindows, "Lucida Console", "Monaco" )
 		  var fontSize as integer = 10
 		  
 		  var tag as variant = RowTagAt( row )
@@ -57,6 +57,10 @@ Inherits GitmasListbox
 		    elseif sampleLine.IsSubtraction then
 		      g.DrawingColor = Color.Red
 		      g.Bold = true
+		      
+		    elseif sampleLine.LineType = M_Git.LineTypes.NoTrailingNewline then
+		      g.DrawingColor = Color.LightGray
+		      g.Italic = true
 		      
 		    end if
 		    
