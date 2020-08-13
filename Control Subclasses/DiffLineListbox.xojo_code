@@ -2,6 +2,23 @@
 Protected Class DiffLineListbox
 Inherits GitmasListbox
 	#tag Event
+		Function CellBackgroundPaint(g As Graphics, row As Integer, column As Integer) As Boolean
+		  #if TargetWindows then
+		    if Selected( row ) then
+		      g.DrawingColor = Color.HighlightColor
+		      g.FillRectangle( 0, 0, g.Width, g.Height )
+		    end if
+		  #endif
+		  
+		  if RaiseEvent CellBackgroundPaint( g, row, column ) then
+		    return true
+		  end if
+		  
+		  
+		End Function
+	#tag EndEvent
+
+	#tag Event
 		Function CellTextPaint(g As Graphics, row As Integer, column As Integer, x as Integer, y as Integer) As Boolean
 		  if RaiseEvent CellTextPaint( g, row, column, x, y ) then
 		    //
@@ -10,7 +27,7 @@ Inherits GitmasListbox
 		    return true
 		  end if
 		  
-		  var fontName as string = if( TargetWindows, "Monaco", "Monaco" )
+		  var fontName as string = if( TargetWindows, "Courier", "Monaco" )
 		  var fontSize as integer = 10
 		  
 		  var tag as variant = RowTagAt( row )
@@ -114,6 +131,10 @@ Inherits GitmasListbox
 		End Function
 	#tag EndEvent
 
+
+	#tag Hook, Flags = &h0
+		Event CellBackgroundPaint(g As Graphics, row As Integer, column As Integer) As Boolean
+	#tag EndHook
 
 	#tag Hook, Flags = &h0
 		Event CellTextPaint(g As Graphics, row As Integer, column As Integer, x as Integer, y as Integer) As Boolean

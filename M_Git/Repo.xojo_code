@@ -127,7 +127,7 @@ Protected Class Repo
 		    previousCountDiff = countDiff
 		  next
 		  
-		  var diff as string = String.FromArray( builder, EndOfLine ) + EndOfLine
+		  var diff as string = String.FromArray( builder, &uA ) + &uA
 		  return diff
 		  
 		  'diff --git a/dragon-gui/UI/Claim Views/Claim Widgets/ClaimAppealControl.xojo_window b/dragon-gui/UI/Claim Views/Claim Widgets/ClaimAppealControl.xojo_window

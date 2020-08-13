@@ -24,12 +24,17 @@ Protected Module M_Git
 
 	#tag Method, Flags = &h21
 		Private Function GitIt(repoPath As FolderItem, subcommand As String) As String
+		  Init
+		  
 		  var cmd as string
-		  #if TargetWindows then
-		    cmd = "chdir " + ShellSafe( repoPath.NativePath ) + " && "
-		  #else
-		    cmd = "cd " + ShellSafe( repoPath.NativePath ) + " && "
-		  #endif
+		  
+		  if repoPath isa object then
+		    #if TargetWindows then
+		      cmd = "chdir " + ShellSafe( repoPath.NativePath ) + " && "
+		    #else
+		      cmd = "cd " + ShellSafe( repoPath.NativePath ) + " && "
+		    #endif
+		  end if
 		  
 		  cmd = cmd + GitCommand + subcommand
 		  
@@ -53,6 +58,19 @@ Protected Module M_Git
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
+		Protected Function GitVersion() As String
+		  try
+		    var version as string = GitIt( nil, "--version" )
+		    return version
+		    
+		  catch err as GitException
+		    return ""
+		  end try
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Sub Init()
 		  if WasInited then
 		    return
@@ -62,19 +80,35 @@ Protected Module M_Git
 		  // Set the git command
 		  //
 		  if GitCommandPath = "" then
+		    var sh as new Shell
+		    
 		    #if not TargetWindows then
-		      var sh as new Shell
+		      var shellPath as string
 		      sh.Execute( "echo $SHELL" )
-		      MaybeExceptionFromShell( "Could not identify shell", sh )
+		      if sh.ExitCode <> 0 then
+		        //
+		        // Fallback
+		        //
+		        shellPath = "bash"
+		      else
+		        shellPath = sh.Result.DefineEncoding( Encodings.UTF8 ).Trim
+		      end if
 		      
-		      var shellPath as string = sh.Result.DefineEncoding( Encodings.UTF8 ).Trim
 		      sh.Execute( shellPath + " -lc 'which git'" )
-		      MaybeExceptionFromShell( "Error finding git command", sh )
 		      
-		      GitCommandPath = sh.Result.DefineEncoding( Encodings.UTF8 ).Trim
-		      GitCommandPath = GitCommandPath.ReplaceLineEndings( &uA )
-		      GitCommandPath = GitCommandPath.NthField( &uA, GitCommandPath.CountFields( &uA ) )
+		    #else
+		      sh.Execute "where git"
+		      
 		    #endif
+		    
+		    var path as string = System.EnvironmentVariable( "PATH" )
+		    
+		    MaybeExceptionFromShell( "Error finding git command", sh )
+		    
+		    GitCommandPath = sh.Result.DefineEncoding( Encodings.UTF8 ).Trim
+		    GitCommandPath = GitCommandPath.ReplaceLineEndings( &uA )
+		    GitCommandPath = GitCommandPath.NthField( &uA, GitCommandPath.CountFields( &uA ) )
+		    
 		    System.DebugLog( "Using git from " + GitCommandPath )
 		  end if
 		  
@@ -178,6 +212,9 @@ Protected Module M_Git
 	#tag EndConstant
 
 	#tag Constant, Name = kGitStatus, Type = String, Dynamic = False, Default = \"status -vv ", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = kLoadWindowsPATH, Type = String, Dynamic = False, Default = \"@echo off\necho.\necho Refreshing PATH from registry\n:: Get System PATH\nfor /f \"tokens\x3D3*\" %%A in (\'reg query \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment\" /v Path\') do set syspath\x3D%%A%%B\n:: Get User Path\nfor /f \"tokens\x3D3*\" %%A in (\'reg query \"HKCU\\Environment\" /v Path\') do set userpath\x3D%%A%%B\n:: Set Refreshed Path\nset PATH\x3D%userpath%;%syspath%\necho Refreshed PATH\necho %PATH%\n", Scope = Private
 	#tag EndConstant
 
 

@@ -3,6 +3,10 @@ Protected Class App
 Inherits Application
 	#tag Event
 		Sub NewDocument()
+		  if M_Git.GitVersion = "" then
+		    return
+		  end if
+		  
 		  //
 		  // There is now "new" here, so call Open
 		  //
@@ -12,8 +16,24 @@ Inherits Application
 	#tag EndEvent
 
 	#tag Event
+		Sub Open()
+		  if M_Git.GitVersion = "" then
+		    MessageBox( "The git command line utility must be installed first." )
+		    quit
+		  end if
+		  
+		End Sub
+	#tag EndEvent
+
+	#tag Event
 		Sub OpenDocument(item As FolderItem)
-		  WasAppOpenedWithDocument = true
+		  if M_Git.GitVersion = "" then
+		    return
+		  end if
+		  
+		  if not item.IsFolder then
+		    item = item.Parent
+		  end if
 		  
 		  //
 		  // Scan for windows that already show this repo
@@ -85,10 +105,6 @@ Inherits Application
 		TempFolder As FolderItem
 	#tag EndComputedProperty
 
-	#tag Property, Flags = &h0
-		WasAppOpenedWithDocument As Boolean
-	#tag EndProperty
-
 
 	#tag Constant, Name = kEditClear, Type = String, Dynamic = False, Default = \"&Delete", Scope = Public
 		#Tag Instance, Platform = Windows, Language = Default, Definition  = \"&Delete"
@@ -106,14 +122,6 @@ Inherits Application
 
 
 	#tag ViewBehavior
-		#tag ViewProperty
-			Name="WasAppOpenedWithDocument"
-			Visible=false
-			Group="Behavior"
-			InitialValue=""
-			Type="Boolean"
-			EditorType=""
-		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class
 #tag EndClass
