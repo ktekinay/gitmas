@@ -759,6 +759,12 @@ End
 		    g.Bold = true
 		    var startingX as integer = column * me.ColumnAt( 0 ).WidthActual
 		    
+		    if IsDarkMode then
+		      g.DrawingColor = Color.White
+		    else
+		      g.DrawingColor = Color.Black
+		    end if
+		    
 		    g.DrawText( spec, 0 - startingX + kBuffer, g.Height - kHeightBuffer )
 		    return true
 		  end if
