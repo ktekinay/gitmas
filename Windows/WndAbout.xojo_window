@@ -10,7 +10,7 @@ Begin Window WndAbout
    HasFullScreenButton=   False
    HasMaximizeButton=   False
    HasMinimizeButton=   False
-   Height          =   164
+   Height          =   186
    ImplicitInstance=   True
    MacProcID       =   0
    MaximumHeight   =   32000
@@ -23,7 +23,7 @@ Begin Window WndAbout
    Title           =   "About"
    Type            =   "0"
    Visible         =   True
-   Width           =   320
+   Width           =   382
    Begin Label Label1
       AllowAutoDeactivate=   True
       Bold            =   False
@@ -57,7 +57,7 @@ Begin Window WndAbout
       Underline       =   False
       Value           =   "gitmas"
       Visible         =   True
-      Width           =   280
+      Width           =   342
    End
    Begin Label Label2
       AllowAutoDeactivate=   True
@@ -68,7 +68,7 @@ Begin Window WndAbout
       FontName        =   "SmallSystem"
       FontSize        =   0.0
       FontUnit        =   0
-      Height          =   52
+      Height          =   81
       Index           =   -2147483648
       InitialParent   =   ""
       Italic          =   False
@@ -90,9 +90,9 @@ Begin Window WndAbout
       Top             =   52
       Transparent     =   False
       Underline       =   False
-      Value           =   "©2020 by MacTechnologies Consulting.\nFor terms of use, see License.md at\nhttps://github.com/ktekinay/gitmas"
+      Value           =   "©2020 by Kem Tekinay, MacTechnologies Consulting.\nFor terms of use, see License at\n\nhttps://github.com/ktekinay/gitmas"
       Visible         =   True
-      Width           =   280
+      Width           =   342
    End
    Begin Label Label3
       AllowAutoDeactivate=   True
@@ -107,12 +107,12 @@ Begin Window WndAbout
       Index           =   -2147483648
       InitialParent   =   ""
       Italic          =   False
-      Left            =   200
-      LockBottom      =   False
+      Left            =   262
+      LockBottom      =   True
       LockedInPosition=   False
       LockLeft        =   False
       LockRight       =   True
-      LockTop         =   True
+      LockTop         =   False
       Multiline       =   False
       Scope           =   2
       Selectable      =   False
@@ -122,7 +122,7 @@ Begin Window WndAbout
       TextAlignment   =   "3"
       TextColor       =   &c00000000
       Tooltip         =   ""
-      Top             =   131
+      Top             =   153
       Transparent     =   False
       Underline       =   False
       Value           =   "Untitled"
