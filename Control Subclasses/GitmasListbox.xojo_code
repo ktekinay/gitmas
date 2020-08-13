@@ -35,10 +35,211 @@ Inherits Listbox
 		End Function
 	#tag EndEvent
 
+	#tag Event
+		Sub Close()
+		  RaiseEvent Close
+		  
+		  if mExpanderTimer isa object then
+		    mExpanderTimer.RunMode = Timer.RunModes.Off
+		    RemoveHandler mExpanderTimer.Action, WeakAddressOf ExpanderTimer_Action
+		    mExpanderTimer = nil
+		  end if
+		  
+		End Sub
+	#tag EndEvent
+
+	#tag Event
+		Sub CollapseRow(row As Integer)
+		  RaiseEvent CollapseRow( row )
+		  
+		  if not IsExpandingAll and IsModifierKeyDown then
+		    //
+		    // Collapse all the rows
+		    //
+		    ExpandValue = false
+		    ExpanderTimer.RunMode = Timer.RunModes.Single
+		  end if
+		  
+		  
+		End Sub
+	#tag EndEvent
+
+	#tag Event
+		Sub ExpandRow(row As Integer)
+		  RaiseEvent ExpandRow( row )
+		  
+		  if not IsExpandingAll and IsModifierKeyDown then
+		    //
+		    // Expand all the rows
+		    //
+		    ExpandValue = true
+		    ExpanderTimer.RunMode = Timer.RunModes.Single
+		  end if
+		  
+		  
+		End Sub
+	#tag EndEvent
+
+
+	#tag Method, Flags = &h0
+		Sub CollapseAll()
+		  IsExpandingAll = true
+		  
+		  for r as integer = LastRowIndex downto 0
+		    if self.ExpandableRowAt( r ) and self.RowExpandedAt( r ) = true then
+		      self.RowExpandedAt( r ) = false
+		    end if
+		  next
+		  
+		  IsExpandingAll = false
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub ExpandAll()
+		  IsExpandingAll = true
+		  
+		  for r as integer = LastRowIndex downto 0
+		    if self.ExpandableRowAt( r ) and self.RowExpandedAt( r ) = false then
+		      self.RowExpandedAt( r ) = true
+		    end if
+		  next
+		  
+		  IsExpandingAll = false
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub ExpanderTimer_Action(sender As Timer)
+		  #pragma unused sender
+		  
+		  if ExpandValue then
+		    ExpandAll
+		  else
+		    CollapseAll
+		  end if
+		  
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function SelectedRows() As Integer()
+		  var rows() as integer
+		  
+		  for row as integer = 0 to self.LastRowIndex
+		    if Selected( row ) then
+		      rows.AddRow( row )
+		    end if
+		  next
+		  
+		  return rows
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub SelectedRows(Assigns rows() As Integer)
+		  //
+		  // Unselect all the rows
+		  //
+		  self.SelectedRowIndex = -1
+		  
+		  for each row as integer in rows
+		    self.Selected( row ) = true
+		  next
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function SelectedRowTags() As Variant()
+		  var tags() as variant
+		  
+		  for row as integer = 0 to self.LastRowIndex
+		    tags.AddRow( RowTagAt( row ) )
+		  next
+		  
+		  return tags
+		  
+		End Function
+	#tag EndMethod
+
 
 	#tag Hook, Flags = &h0
 		Event CellBackgroundPaint(g As Graphics, row As Integer, column As Integer) As Boolean
 	#tag EndHook
+
+	#tag Hook, Flags = &h0
+		Event Close()
+	#tag EndHook
+
+	#tag Hook, Flags = &h0
+		Event CollapseRow(row As Integer)
+	#tag EndHook
+
+	#tag Hook, Flags = &h0
+		Event ExpandRow(row As Integer)
+	#tag EndHook
+
+
+	#tag ComputedProperty, Flags = &h21
+		#tag Getter
+			Get
+			  if mExpanderTimer is nil then
+			    mExpanderTimer = new Timer
+			    mExpanderTimer.Period = 5
+			    mExpanderTimer.RunMode = Timer.RunModes.Off
+			    
+			    AddHandler mExpanderTimer.Action, WeakAddressOf ExpanderTimer_Action
+			  end if
+			  
+			  return mExpanderTimer
+			End Get
+		#tag EndGetter
+		Private ExpanderTimer As Timer
+	#tag EndComputedProperty
+
+	#tag Property, Flags = &h21
+		Private ExpandValue As Boolean
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private IsExpandingAll As Boolean
+	#tag EndProperty
+
+	#tag ComputedProperty, Flags = &h21
+		#tag Getter
+			Get
+			  var result as boolean
+			  
+			  if TargetMacOS and _
+			    Keyboard.OptionKey and _
+			    not Keyboard.ShiftKey and _
+			    not Keyboard.ControlKey and _
+			    not Keyboard.CommandKey then
+			    result = true
+			    
+			  elseif not TargetMacOS and _
+			    Keyboard.AltKey and _
+			    not Keyboard.ShiftKey and _
+			    not Keyboard.ControlKey and _
+			    not Keyboard.OSKey then
+			    result = true
+			  end if
+			  
+			  return result
+			  
+			End Get
+		#tag EndGetter
+		Private IsModifierKeyDown As Boolean
+	#tag EndComputedProperty
+
+	#tag Property, Flags = &h21
+		Private mExpanderTimer As Timer
+	#tag EndProperty
 
 
 	#tag ViewBehavior

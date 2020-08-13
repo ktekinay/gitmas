@@ -39,7 +39,7 @@ Begin Window WndRepo
       Italic          =   False
       Left            =   20
       LockBottom      =   False
-      LockedInPosition=   False
+      LockedInPosition=   True
       LockLeft        =   True
       LockRight       =   False
       LockTop         =   True
@@ -74,7 +74,7 @@ Begin Window WndRepo
       Italic          =   False
       Left            =   123
       LockBottom      =   False
-      LockedInPosition=   False
+      LockedInPosition=   True
       LockLeft        =   True
       LockRight       =   True
       LockTop         =   True
@@ -127,7 +127,7 @@ Begin Window WndRepo
       Italic          =   False
       Left            =   20
       LockBottom      =   True
-      LockedInPosition=   False
+      LockedInPosition=   True
       LockLeft        =   True
       LockRight       =   False
       LockTop         =   True
@@ -162,7 +162,7 @@ Begin Window WndRepo
       Italic          =   False
       Left            =   259
       LockBottom      =   True
-      LockedInPosition=   False
+      LockedInPosition=   True
       LockLeft        =   True
       LockRight       =   False
       LockTop         =   False
@@ -194,7 +194,7 @@ Begin Window WndRepo
       Italic          =   False
       Left            =   167
       LockBottom      =   True
-      LockedInPosition=   False
+      LockedInPosition=   True
       LockLeft        =   True
       LockRight       =   False
       LockTop         =   False
@@ -214,7 +214,7 @@ Begin Window WndRepo
       CurrentBranch   =   ""
       EOL             =   ""
       Index           =   -2147483648
-      LockedInPosition=   False
+      LockedInPosition=   True
       Scope           =   2
       TabPanelIndex   =   0
    End
@@ -233,7 +233,7 @@ Begin Window WndRepo
       Italic          =   False
       Left            =   20
       LockBottom      =   False
-      LockedInPosition=   False
+      LockedInPosition=   True
       LockLeft        =   True
       LockRight       =   True
       LockTop         =   True
@@ -286,12 +286,12 @@ Begin Window WndRepo
       Italic          =   False
       Left            =   351
       LockBottom      =   True
-      LockedInPosition=   False
+      LockedInPosition=   True
       LockLeft        =   True
       LockRight       =   True
       LockTop         =   True
       RequiresSelection=   False
-      RowSelectionType=   "0"
+      RowSelectionType=   "1"
       Scope           =   2
       TabIndex        =   6
       TabPanelIndex   =   0
@@ -333,6 +333,32 @@ End
 		  next
 		  
 		  return arr
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function LinesMatching(line As M_Git.DiffLine) As M_Git.DiffLine()
+		  var key as string = line.Value.Trim
+		  
+		  for row as integer = 0 to LbLines.LastRowIndex
+		    var rowKey as string = LbLines.CellValueAt( row, 0 )
+		    if rowKey = key then
+		      return LbLines.RowTagAt( row )
+		    end if
+		  next
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function MaybeRevert(lines() As M_Git.DiffLine) As Boolean
+		  if QuickRequestDialog( self, "Really revert these lines?", "This cannot be undone.", "Revert" ) = "Revert" then
+		    MyRepo.RevertLines( lines )
+		    return true
+		  end if
+		  
+		  return false
 		  
 		End Function
 	#tag EndMethod
@@ -381,6 +407,9 @@ End
 		  // Fill in the listbox
 		  //
 		  var lbLinesScrollPosition as integer = LbLines.ScrollPosition
+		  var lbLinesSelectedRows() as integer = LbLines.SelectedRows
+		  var lbFilesScrollPosition as integer = LbLineFiles.ScrollPosition
+		  var lbFilesSelectedRows() as integer = LbLineFiles.SelectedRows
 		  
 		  LbLines.RemoveAllRows
 		  for each key as string in lineDict.Keys
@@ -391,7 +420,10 @@ End
 		  next
 		  
 		  LbLines.Sort
+		  LbLines.SelectedRows = lbLinesSelectedRows
 		  LbLines.ScrollPosition = lbLinesScrollPosition
+		  LbLineFiles.SelectedRows = lbFilesSelectedRows
+		  LbLineFiles.ScrollPosition = lbFilesScrollPosition
 		  
 		  return
 		End Sub
@@ -465,6 +497,13 @@ End
 		    
 		    LbLineFiles.RowTagAt( LbLineFiles.LastAddedRowIndex ) = fileDict.Value( file )
 		    LbLineFiles.CellTagAt( LbLineFiles.LastAddedRowIndex, 0 ) = file
+		    
+		    //
+		    // Expand the row as needed
+		    //
+		    if IsFileRowExpandedDict.Lookup( EncodeHex( file.ToPathSpec ), true ) then
+		      LbLineFiles.RowExpandedAt( LbLineFiles.LastAddedRowIndex ) = true
+		    end if
 		  next
 		  
 		End Sub
@@ -509,9 +548,51 @@ End
 		GitFolder As FolderItem
 	#tag EndComputedProperty
 
+	#tag ComputedProperty, Flags = &h21
+		#tag Getter
+			Get
+			  if mIsFileRowExpandedDict is nil then
+			    mIsFileRowExpandedDict = new Dictionary
+			  end if
+			  
+			  return mIsFileRowExpandedDict
+			End Get
+		#tag EndGetter
+		Private Shared IsFileRowExpandedDict As Dictionary
+	#tag EndComputedProperty
+
 	#tag Property, Flags = &h21
 		Private IsShowingError As Boolean
 	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private Shared mIsFileRowExpandedDict As Dictionary
+	#tag EndProperty
+
+
+	#tag Constant, Name = kCaptionCollapseAll, Type = String, Dynamic = False, Default = \"Collapse All", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = kCaptionExpandAll, Type = String, Dynamic = False, Default = \"Expand All", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = kCaptionOpenFiles, Type = String, Dynamic = False, Default = \"Open Files", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = kCaptionRevertAllLinesLikeThese, Type = String, Dynamic = False, Default = \"Revert All Lines Like These...", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = kCaptionRevertTheseLines, Type = String, Dynamic = False, Default = \"Revert These Lines...", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = kCaptionShowFiles, Type = String, Dynamic = False, Default = \"Show Files On Disk", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = kCaptionStageAllLikeThese, Type = String, Dynamic = False, Default = \"Stage All Lines Like These", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = kCaptionStageTheseLines, Type = String, Dynamic = False, Default = \"Stage These Lines", Scope = Private
+	#tag EndConstant
 
 
 #tag EndWindowCode
@@ -535,6 +616,34 @@ End
 		  me.ColumnAlignmentAt( 1 ) = ListBox.Alignments.Right
 		End Sub
 	#tag EndEvent
+	#tag Event
+		Function ConstructContextualMenu(base as MenuItem, x as Integer, y as Integer) As Boolean
+		  #pragma unused x
+		  #pragma unused y
+		  
+		  var lines() as M_Git.DiffLine = GetSelectedLines
+		  
+		  base.AddMenu( new MenuItem( kCaptionStageTheseLines, lines ) )
+		  base.AddMenu( new MenuItem( kCaptionRevertTheseLines, lines ) )
+		  
+		  return true
+		  
+		End Function
+	#tag EndEvent
+	#tag Event
+		Function ContextualMenuAction(hitItem as MenuItem) As Boolean
+		  select case hitItem.Value
+		  case kCaptionStageTheseLines
+		    MyRepo.StageLines( hitItem.Tag )
+		    return true
+		    
+		  case kCaptionRevertTheseLines
+		    call MaybeRevert( hitItem.Tag )
+		    return true
+		    
+		  end select
+		End Function
+	#tag EndEvent
 #tag EndEvents
 #tag Events BtnStage
 	#tag Event
@@ -548,9 +657,8 @@ End
 #tag Events BtnRevert
 	#tag Event
 		Sub Action()
-		  if QuickRequestDialog( self, "Really revert these lines?", "This cannot be undone.", "Revert" ) = "Revert" then
-		    MyRepo.RevertLines( GetSelectedLines )
-		  end if
+		  call MaybeRevert( GetSelectedLines )
+		  
 		End Sub
 	#tag EndEvent
 #tag EndEvents
@@ -614,6 +722,10 @@ End
 		      me.AddRow "..."
 		    end if
 		  next
+		  
+		  var df as M_Git.DiffFile = me.CellTagAt( row, 0 )
+		  IsFileRowExpandedDict.Value( EncodeHex( df.ToPathSpec ) ) = true
+		  
 		End Sub
 	#tag EndEvent
 	#tag Event
@@ -651,6 +763,136 @@ End
 		    return true
 		  end if
 		  
+		  
+		End Function
+	#tag EndEvent
+	#tag Event
+		Sub CollapseRow(row As Integer)
+		  var df as M_Git.DiffFile = me.CellTagAt( row, 0 )
+		  IsFileRowExpandedDict.Value( EncodeHex( df.ToPathSpec ) ) = false
+		  
+		End Sub
+	#tag EndEvent
+	#tag Event
+		Function ConstructContextualMenu(base as MenuItem, x as Integer, y as Integer) As Boolean
+		  #pragma unused x
+		  #pragma unused y
+		  
+		  //
+		  // Add the standard options
+		  //
+		  base.AddMenu( new MenuItem( kCaptionExpandAll ) )
+		  base.AddMenu( new MenuItem( kCaptionCollapseAll ) )
+		  
+		  //
+		  // See what's selected
+		  //
+		  var selectedRows() as integer = me.SelectedRows
+		  
+		  var files() as M_Git.DiffFile
+		  var lines() as M_Git.DiffLine
+		  
+		  for each row as integer in selectedRows
+		    if me.ExpandableRowAt( row ) then
+		      files.AddRow( me.CellTagAt( row, 0 ) )
+		    else
+		      lines.AddRow( me.RowTagAt( row ) )
+		    end if
+		  next
+		  
+		  if files.Count <> 0 then
+		    base.AddMenu( new MenuItem( MenuItem.TextSeparator ) )
+		    base.AddMenu( new MenuItem( kCaptionOpenFiles, files ) )
+		    base.AddMenu( new MenuItem( kCaptionShowFiles, files ) )
+		  end if
+		  
+		  if lines.Count <> 0 then
+		    base.AddMenu( new MenuItem( MenuItem.TextSeparator ) )
+		    base.AddMenu( new MenuItem( kCaptionStageTheseLines, lines ) )
+		    base.AddMenu( new MenuItem( kCaptionStageAllLikeThese, lines ) )
+		    
+		    base.AddMenu( new MenuItem( MenuItem.TextSeparator ) )
+		    base.AddMenu( new MenuItem( kCaptionRevertTheseLines, lines ) )
+		    base.AddMenu( new MenuItem( kCaptionRevertAllLinesLikeThese, lines ) )
+		  end if
+		  
+		  return true
+		  
+		End Function
+	#tag EndEvent
+	#tag Event
+		Function ContextualMenuAction(hitItem as MenuItem) As Boolean
+		  var lines() as M_Git.DiffLine
+		  var likeThese as boolean
+		  var isRevert as boolean
+		  var isStage as boolean
+		  
+		  select case hitItem.Value
+		  case kCaptionExpandAll
+		    me.ExpandAll
+		    return true
+		    
+		  case kCaptionCollapseAll
+		    me.CollapseAll
+		    return true
+		    
+		  case kCaptionOpenFiles
+		    var files() as M_Git.DiffFile = hitItem.Tag
+		    for each file as M_Git.DiffFile in files
+		      file.ToFile.Open
+		    next
+		    return true
+		    
+		  case kCaptionShowFiles
+		    var files() as M_Git.DiffFile = hitItem.Tag
+		    for each file as M_Git.DiffFile in files
+		      file.ToFile.Parent.Open
+		    next
+		    return true
+		    
+		  case kCaptionStageTheseLines
+		    lines = hitItem.Tag
+		    isStage = true
+		    
+		  case kCaptionStageAllLikeThese
+		    lines = hitItem.Tag
+		    isStage = true
+		    likeThese = true
+		    
+		  case kCaptionRevertTheseLines
+		    lines = hitItem.Tag
+		    isRevert = true
+		    
+		  case kCaptionRevertAllLinesLikeThese
+		    lines = hitItem.Tag
+		    isRevert = true
+		    likeThese = true
+		    
+		  end select
+		  
+		  if likeThese then
+		    var realLines() as M_Git.DiffLine
+		    
+		    for each iline as M_Git.DiffLine in lines
+		      for each line as M_Git.DiffLine in LinesMatching( iline )
+		        realLines.AddRow( line )
+		      next
+		    next
+		    lines = realLines
+		  end if
+		  
+		  if isStage then
+		    MyRepo.StageLines( lines )
+		    LbLineFiles.SelectedRowIndex = -1
+		    return true
+		    
+		  elseif isRevert then
+		    if MaybeRevert( lines ) then
+		      LbLineFiles.SelectedRowIndex = -1
+		    end if
+		    return true
+		    
+		  end if
 		  
 		End Function
 	#tag EndEvent
