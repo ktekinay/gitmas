@@ -40,6 +40,15 @@ Inherits Application
 
 
 	#tag MenuHandler
+		Function AboutMenu() As Boolean Handles AboutMenu.Action
+			WndAbout.Show
+			return true
+			
+			
+		End Function
+	#tag EndMenuHandler
+
+	#tag MenuHandler
 		Function FileOpenMenu() As Boolean Handles FileOpenMenu.Action
 			OpenRepo
 			Return True

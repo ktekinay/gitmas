@@ -128,5 +128,23 @@ Begin Menu MainMenuBar
          Visible = True
       End
    End
+   Begin MenuItem HelpMenu
+      SpecialMenu = 0
+      Value = "&Help"
+      Index = -2147483648
+      Text = "&Help"
+      AutoEnabled = True
+      AutoEnable = True
+      Visible = True
+      Begin ApplicationMenuItem AboutMenu
+         SpecialMenu = 0
+         Value = "About"
+         Index = -2147483648
+         Text = "About"
+         AutoEnabled = True
+         AutoEnable = True
+         Visible = True
+      End
+   End
 End
 #tag EndMenu

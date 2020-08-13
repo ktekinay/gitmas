@@ -5,6 +5,7 @@ OrigIDEVersion=20200100
 Class=App;App.xojo_code;&h000000000C99E7FF;&h0000000000000000;false
 MenuBar=MainMenuBar;MainMenuBar.xojo_menu;&h0000000053D87FFF;&h0000000000000000;false
 Folder=Windows;Windows;&h000000002B8647FF;&h0000000000000000;false
+Window=WndAbout;Windows/WndAbout.xojo_window;&h000000000D00B7FF;&h000000002B8647FF;false
 Window=WndRepo;Windows/WndRepo.xojo_window;&h0000000054643FFF;&h000000002B8647FF;false
 Folder=Control Subclasses;Control Subclasses;&h000000003815D7FF;&h0000000000000000;false
 Folder=Helpers;Helpers;&h0000000057B6EFFF;&h0000000000000000;false
