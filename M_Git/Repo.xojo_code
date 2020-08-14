@@ -173,7 +173,7 @@ Protected Class Repo
 		  parts.RemoveRowAt( 0 )
 		  
 		  for each part as string in parts
-		    diffs.AddRow new DiffFile( self, part )
+		    diffs.AddRow( new DiffFile( self, part ) )
 		  next
 		  
 		  return diffs

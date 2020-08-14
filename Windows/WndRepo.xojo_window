@@ -383,6 +383,13 @@ End
 		  var lineDict as new Dictionary
 		  
 		  for each df as M_Git.DiffFile in diffs
+		    if df.IsBinaryFile then
+		      //
+		      // Ignore these
+		      //
+		      continue for df
+		    end if
+		    
 		    for each hunk as M_Git.Hunk in df.Hunks
 		      for each dl as M_Git.DiffLine in hunk.Lines
 		        if dl.IsUnchanged or dl.LineType = M_Git.LineTypes.NoTrailingNewline then

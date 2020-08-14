@@ -36,6 +36,7 @@ Protected Class DiffFile
 		  'Width           =   235
 		  
 		  const kHunkSep as string = "@@ "
+		  const kBinaryFiles as string = "Binary files "
 		  
 		  Parent = repo
 		  
@@ -50,6 +51,16 @@ Protected Class DiffFile
 		      FromFile = ExtractFolderItem( repo.GitFolder, header.Middle( 4 ), FromPathSpec )
 		    elseif header.BeginsWith( "+++" ) then
 		      ToFile = ExtractFolderItem( repo.GitFolder, header.Middle( 4 ), ToPathSpec )
+		    elseif header.BeginsWith( kBinaryFiles ) then
+		      IsBinaryFile = true
+		      header = header.Middle( kBinaryFiles.Length )
+		      var parts() as string = header.Split( " and b/" )
+		      FromFile = ExtractFolderItem( repo.GitFolder, parts( 0 ), FromPathSpec )
+		      
+		      if parts.Count = 2 then
+		        parts( 1 ) = "b/" + parts( 1 )
+		        ToFile = ExtractFolderItem( repo.GitFolder, parts( 1 ), ToPathSpec )
+		      end if
 		    end if
 		  next
 		  
@@ -114,6 +125,10 @@ Protected Class DiffFile
 
 	#tag Property, Flags = &h0
 		Hunks() As Hunk
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		IsBinaryFile As Boolean
 	#tag EndProperty
 
 	#tag ComputedProperty, Flags = &h0
