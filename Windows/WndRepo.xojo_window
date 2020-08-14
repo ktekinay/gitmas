@@ -126,6 +126,7 @@ Begin Window WndRepo
       InitialValue    =   "Line	Count"
       Italic          =   False
       Left            =   20
+      LineValueColumn =   0
       LockBottom      =   True
       LockedInPosition=   True
       LockLeft        =   True
@@ -134,6 +135,7 @@ Begin Window WndRepo
       RequiresSelection=   False
       RowSelectionType=   "1"
       Scope           =   2
+      ShowNoContent   =   True
       TabIndex        =   2
       TabPanelIndex   =   0
       TabStop         =   True
@@ -285,6 +287,7 @@ Begin Window WndRepo
       InitialValue    =   ""
       Italic          =   False
       Left            =   351
+      LineValueColumn =   2
       LockBottom      =   True
       LockedInPosition=   True
       LockLeft        =   True
@@ -293,6 +296,7 @@ Begin Window WndRepo
       RequiresSelection=   False
       RowSelectionType=   "1"
       Scope           =   2
+      ShowNoContent   =   False
       TabIndex        =   6
       TabPanelIndex   =   0
       TabStop         =   True

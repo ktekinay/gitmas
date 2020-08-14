@@ -42,11 +42,15 @@ Inherits GitmasListbox
 		    sampleLine = tag
 		  end if
 		  
+		  var result as boolean
+		  
 		  if sampleLine is nil then
 		    //
 		    // Do nothing
 		    //
 		  else
+		    var sampleLineIsEmpty as boolean = sampleLine.Value.Trim = ""
+		    
 		    g.FontName = fontName
 		    g.FontSize = fontSize
 		    
@@ -62,11 +66,21 @@ Inherits GitmasListbox
 		      g.DrawingColor = Color.LightGray
 		      g.Italic = true
 		      
+		    elseif column = LineValueColumn and sampleLineIsEmpty then
+		      g.DrawingColor = Color.LightGray
+		      
 		    end if
 		    
+		    if column = LineValueColumn and sampleLineIsEmpty and ShowNoContent then
+		      //
+		      // Draw it ourselves
+		      //
+		      g.DrawText( "<< no content >>", x, y )
+		      result = true
+		    end if
 		  end if
 		  
-		  return false // Let Xojo draw the text
+		  return result // Let Xojo draw the text
 		  
 		End Function
 	#tag EndEvent
@@ -147,6 +161,15 @@ Inherits GitmasListbox
 	#tag Hook, Flags = &h0
 		Event CompareRows(row1 as Integer, row2 as Integer, column as Integer, ByRef result as Integer) As Boolean
 	#tag EndHook
+
+
+	#tag Property, Flags = &h0
+		LineValueColumn As Integer
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		ShowNoContent As Boolean = True
+	#tag EndProperty
 
 
 	#tag ViewBehavior
@@ -247,35 +270,11 @@ Inherits GitmasListbox
 			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="TabPanelIndex"
-			Visible=false
-			Group="Position"
-			InitialValue="0"
-			Type="Integer"
-			EditorType=""
-		#tag EndViewProperty
-		#tag ViewProperty
 			Name="TabStop"
 			Visible=true
 			Group="Position"
 			InitialValue="True"
 			Type="Boolean"
-			EditorType=""
-		#tag EndViewProperty
-		#tag ViewProperty
-			Name="_ScrollOffset"
-			Visible=false
-			Group="Appearance"
-			InitialValue="0"
-			Type="Integer"
-			EditorType=""
-		#tag EndViewProperty
-		#tag ViewProperty
-			Name="_ScrollWidth"
-			Visible=false
-			Group="Appearance"
-			InitialValue="-1"
-			Type="Integer"
 			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
@@ -439,59 +438,20 @@ Inherits GitmasListbox
 			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="Bold"
+			Name="DataSource"
 			Visible=true
-			Group="Font"
-			InitialValue="False"
-			Type="Boolean"
-			EditorType=""
-		#tag EndViewProperty
-		#tag ViewProperty
-			Name="Italic"
-			Visible=true
-			Group="Font"
-			InitialValue="False"
-			Type="Boolean"
-			EditorType=""
-		#tag EndViewProperty
-		#tag ViewProperty
-			Name="FontName"
-			Visible=true
-			Group="Font"
-			InitialValue="System"
+			Group="Database Binding"
+			InitialValue=""
 			Type="String"
-			EditorType=""
+			EditorType="DataSource"
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="FontSize"
+			Name="DataField"
 			Visible=true
-			Group="Font"
-			InitialValue="0"
-			Type="Single"
-			EditorType=""
-		#tag EndViewProperty
-		#tag ViewProperty
-			Name="FontUnit"
-			Visible=true
-			Group="Font"
-			InitialValue="0"
-			Type="FontUnits"
-			EditorType="Enum"
-			#tag EnumValues
-				"0 - Default"
-				"1 - Pixel"
-				"2 - Point"
-				"3 - Inch"
-				"4 - Millimeter"
-			#tag EndEnumValues
-		#tag EndViewProperty
-		#tag ViewProperty
-			Name="Underline"
-			Visible=true
-			Group="Font"
-			InitialValue="False"
-			Type="Boolean"
-			EditorType=""
+			Group="Database Binding"
+			InitialValue=""
+			Type="String"
+			EditorType="DataField"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="AllowAutoHideScrollbars"
@@ -554,20 +514,99 @@ Inherits GitmasListbox
 			#tag EndEnumValues
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="DataSource"
+			Name="LineValueColumn"
 			Visible=true
-			Group="Database Binding"
+			Group="Behavior"
 			InitialValue=""
-			Type="String"
-			EditorType="DataSource"
+			Type="Integer"
+			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="DataField"
+			Name="ShowNoContent"
 			Visible=true
-			Group="Database Binding"
-			InitialValue=""
+			Group="Behavior"
+			InitialValue="True"
+			Type="Boolean"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Bold"
+			Visible=true
+			Group="Font"
+			InitialValue="False"
+			Type="Boolean"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Italic"
+			Visible=true
+			Group="Font"
+			InitialValue="False"
+			Type="Boolean"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="FontName"
+			Visible=true
+			Group="Font"
+			InitialValue="System"
 			Type="String"
-			EditorType="DataField"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="FontSize"
+			Visible=true
+			Group="Font"
+			InitialValue="0"
+			Type="Single"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="FontUnit"
+			Visible=true
+			Group="Font"
+			InitialValue="0"
+			Type="FontUnits"
+			EditorType="Enum"
+			#tag EnumValues
+				"0 - Default"
+				"1 - Pixel"
+				"2 - Point"
+				"3 - Inch"
+				"4 - Millimeter"
+			#tag EndEnumValues
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Underline"
+			Visible=true
+			Group="Font"
+			InitialValue="False"
+			Type="Boolean"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="TabPanelIndex"
+			Visible=false
+			Group="Position"
+			InitialValue="0"
+			Type="Integer"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="_ScrollOffset"
+			Visible=false
+			Group="Appearance"
+			InitialValue="0"
+			Type="Integer"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="_ScrollWidth"
+			Visible=false
+			Group="Appearance"
+			InitialValue="-1"
+			Type="Integer"
+			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="InitialParent"
