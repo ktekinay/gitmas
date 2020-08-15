@@ -148,7 +148,7 @@ Begin Window WndRepo
       _ScrollOffset   =   0
       _ScrollWidth    =   -1
    End
-   Begin PushButton BtnStage
+   Begin PlatformPushButton BtnStage
       AllowAutoDeactivate=   True
       Bold            =   False
       Cancel          =   False
@@ -180,7 +180,7 @@ Begin Window WndRepo
       Visible         =   True
       Width           =   80
    End
-   Begin PushButton BtnRevert
+   Begin PlatformPushButton BtnRevert
       AllowAutoDeactivate=   True
       Bold            =   False
       Cancel          =   False

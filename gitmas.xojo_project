@@ -20,6 +20,7 @@ Class=GitmasListbox;Control Subclasses/GitmasListbox.xojo_code;&h00000000723867F
 Class=DiffLineListbox;Control Subclasses/DiffLineListbox.xojo_code;&h00000000389777FF;&h000000003815D7FF;false
 Class=DiffFile;M_Git/DiffFile.xojo_code;&h0000000040DF27FF;&h000000007BB1AFFF;false
 Module=GuiHelpers;Helpers/GuiHelpers.xojo_code;&h00000000406F77FF;&h0000000057B6EFFF;false
+Class=PlatformPushButton;Control Subclasses/PlatformPushButton.xojo_code;&h000000000FD507FF;&h000000003815D7FF;false
 AppMenuBar=MainMenuBar
 MajorVersion=1
 MinorVersion=0
