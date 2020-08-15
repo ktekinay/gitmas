@@ -206,6 +206,7 @@ Protected Module M_Git
 	#tag EndConstant
 
 	#tag Constant, Name = kGitOptions, Type = String, Dynamic = False, Default = \"--no-pager --no-optional-locks -c color.branch\x3Dfalse -c color.diff\x3Dfalse -c color.status\x3Dfalse -c diff.mnemonicprefix\x3Dfalse -c core.quotepath\x3Dfalse", Scope = Private
+		#Tag Instance, Platform = Linux, Language = Default, Definition  = \"--no-pager -c color.branch\x3Dfalse -c color.diff\x3Dfalse -c color.status\x3Dfalse -c diff.mnemonicprefix\x3Dfalse -c core.quotepath\x3Dfalse"
 	#tag EndConstant
 
 	#tag Constant, Name = kGitResetHard, Type = String, Dynamic = False, Default = \"reset --hard HEAD -- ", Scope = Private
