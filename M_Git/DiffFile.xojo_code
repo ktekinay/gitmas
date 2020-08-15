@@ -86,12 +86,18 @@ Protected Class DiffFile
 		  var left1 as string = path.Left( 1 )
 		  var left2 as string = path.Left( 2 )
 		  
-		  if left2 = "a/" or left2 = "b/" then
-		    path = path.Middle( 1 )
-		    pathSpec = path.Middle( 1 )
-		  elseif left1 = "/" or ( TargetWindows and left1 = "\" ) then
-		    pathSpec = path.Middle( 1 )
+		  var newPath as string
+		  
+		  if path.Middle( 2, 4 ) = "HEAD" then
+		    newPath = ParentFolder.NativePath
+		    pathSpec = path.Middle( 2 )
+		    
+		  elseif left2 = "a/" or left2 = "b/" then
+		    newPath = parentFolder.NativePath + path.Middle( 1 )
+		    pathSpec = path.Middle( 2 )
+		      
 		  else
+		    newPath = path
 		    pathSpec = path
 		  end if
 		  
@@ -99,7 +105,6 @@ Protected Class DiffFile
 		    path = path.ReplaceAll( "/", "\" )
 		  #endif
 		  
-		  var newPath as string = parentFolder.NativePath + path
 		  var f as new FolderItem( newPath )
 		  return f
 		  
@@ -240,6 +245,14 @@ Protected Class DiffFile
 			InitialValue=""
 			Type="String"
 			EditorType="MultiLineEditor"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="IsBinaryFile"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="Boolean"
+			EditorType=""
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class
