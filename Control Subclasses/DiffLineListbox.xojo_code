@@ -27,7 +27,7 @@ Inherits GitmasListbox
 		    return true
 		  end if
 		  
-		  var fontName as string = if( TargetWindows, "Lucida Console", "Monaco" )
+		  var fontName as string = App.MonoFontName
 		  var fontSize as integer = 10
 		  
 		  var tag as variant = RowTagAt( row )

@@ -22,6 +22,44 @@ Inherits Application
 		    quit
 		  end if
 		  
+		  //
+		  // Load up the best mono font
+		  //
+		  var fonts() as string
+		  for i as integer = 0 to System.LastFontIndex
+		    fonts.AddRow( System.FontAt( i ) )
+		  next
+		  
+		  #if DebugBuild then
+		    fonts.Sort
+		  #endif
+		  
+		  var bestFonts() as string = array( _
+		  "JetBrains Mono NL", _
+		  "JetBrainsMono NL", _
+		  "JetBrains Mono", _
+		  "JetBrainsMono", _
+		  "Source Code Pro", _
+		  "SourceCode Pro", _
+		  "SourceCodePro", _
+		  "Noto Mono", _
+		  "Lucida Console", _
+		  "Courier New", _
+		  "Courier", _
+		  "Monaco" _
+		  )
+		  
+		  for each f as string in bestFonts
+		    if fonts.IndexOf( f ) <> -1 then
+		      MonoFontName = f
+		      exit
+		    end if
+		  next
+		  
+		  if MonoFontName = "" then
+		    MonoFontName = "SmallSystem"
+		  end if
+		  
 		End Sub
 	#tag EndEvent
 
@@ -90,6 +128,10 @@ Inherits Application
 		End Sub
 	#tag EndMethod
 
+
+	#tag Property, Flags = &h0
+		MonoFontName As String
+	#tag EndProperty
 
 	#tag ComputedProperty, Flags = &h0
 		#tag Getter
