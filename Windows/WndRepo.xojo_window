@@ -831,8 +831,18 @@ End
 		      
 		    end if
 		    
+		    var specParts() as string = spec.Split( "/" )
+		    var filename as string = if( specParts.Count <> 0, specParts.Pop, "" )
+		    spec = String.FromArray( specParts, "/" ) + "/"
+		    
 		    g.DrawingColor = textColor
+		    
+		    g.Bold = false
 		    g.DrawText( spec, useX, useY )
+		    
+		    var swidth as double = g.TextWidth( spec )
+		    g.Bold = true
+		    g.DrawText( filename, useX + swidth, useY )
 		    
 		    return true
 		    
