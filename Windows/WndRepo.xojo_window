@@ -120,7 +120,7 @@ Begin Window WndRepo
       HasHorizontalScrollbar=   False
       HasVerticalScrollbar=   True
       HeadingIndex    =   -1
-      Height          =   542
+      Height          =   591
       Index           =   -2147483648
       InitialParent   =   ""
       InitialValue    =   "Line	Count"
@@ -176,7 +176,7 @@ Begin Window WndRepo
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   626
+      Top             =   682
       Transparent     =   False
       Underline       =   False
       Visible         =   True
@@ -208,7 +208,7 @@ Begin Window WndRepo
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   626
+      Top             =   682
       Transparent     =   False
       Underline       =   False
       Visible         =   True
@@ -283,7 +283,7 @@ Begin Window WndRepo
       HasHorizontalScrollbar=   False
       HasVerticalScrollbar=   True
       HeadingIndex    =   -1
-      Height          =   574
+      Height          =   630
       Index           =   -2147483648
       InitialParent   =   ""
       InitialValue    =   ""
