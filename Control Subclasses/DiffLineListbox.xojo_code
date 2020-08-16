@@ -27,8 +27,8 @@ Inherits GitmasListbox
 		    return true
 		  end if
 		  
-		  var fontName as string = App.MonoFontName
-		  var fontSize as integer = 10
+		  var fontName as string = me.MonoFontName
+		  var fontSize as integer = me.MonoFontSize
 		  
 		  var tag as variant = RowTagAt( row )
 		  var sampleLine as M_Git.DiffLine
@@ -54,12 +54,14 @@ Inherits GitmasListbox
 		    g.FontName = fontName
 		    g.FontSize = fontSize
 		    
+		    var initialColor as color = g.DrawingColor
+		    
 		    if sampleLine.IsAddition then
-		      g.DrawingColor = &c00BD0400
+		      g.DrawingColor = kColorAddition
 		      g.Bold = true
 		      
 		    elseif sampleLine.IsSubtraction then
-		      g.DrawingColor = Color.Red
+		      g.DrawingColor = kColorSubtraction
 		      g.Bold = true
 		      
 		    elseif sampleLine.LineType = M_Git.LineTypes.NoTrailingNewline then
@@ -69,6 +71,13 @@ Inherits GitmasListbox
 		    elseif column = LineValueColumn and sampleLineIsEmpty then
 		      g.DrawingColor = Color.LightGray
 		      
+		    end if
+		    
+		    if Selected( row ) then
+		      //
+		      // Revert the color
+		      //
+		      g.DrawingColor = initialColor
 		    end if
 		    
 		    if column = LineValueColumn and sampleLineIsEmpty and ShowNoContent then
@@ -172,7 +181,30 @@ Inherits GitmasListbox
 	#tag EndProperty
 
 
+	#tag Constant, Name = kColorAddition, Type = Color, Dynamic = False, Default = \"&c00BD0400", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = kColorSubtraction, Type = Color, Dynamic = False, Default = \"&cFF000000", Scope = Public
+	#tag EndConstant
+
+
 	#tag ViewBehavior
+		#tag ViewProperty
+			Name="MonoFontName"
+			Visible=true
+			Group="Behavior"
+			InitialValue=""
+			Type="String"
+			EditorType="MultiLineEditor"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="MonoFontSize"
+			Visible=true
+			Group="Behavior"
+			InitialValue=""
+			Type="Integer"
+			EditorType=""
+		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Name"
 			Visible=true

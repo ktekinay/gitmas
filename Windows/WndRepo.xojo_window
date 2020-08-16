@@ -120,7 +120,7 @@ Begin Window WndRepo
       HasHorizontalScrollbar=   False
       HasVerticalScrollbar=   True
       HeadingIndex    =   -1
-      Height          =   542
+      Height          =   591
       Index           =   -2147483648
       InitialParent   =   ""
       InitialValue    =   "Line	Count"
@@ -132,6 +132,8 @@ Begin Window WndRepo
       LockLeft        =   True
       LockRight       =   False
       LockTop         =   True
+      MonoFontName    =   ""
+      MonoFontSize    =   0
       RequiresSelection=   False
       RowSelectionType=   "1"
       Scope           =   2
@@ -174,7 +176,7 @@ Begin Window WndRepo
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   626
+      Top             =   682
       Transparent     =   False
       Underline       =   False
       Visible         =   True
@@ -206,7 +208,7 @@ Begin Window WndRepo
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   626
+      Top             =   682
       Transparent     =   False
       Underline       =   False
       Visible         =   True
@@ -281,7 +283,7 @@ Begin Window WndRepo
       HasHorizontalScrollbar=   False
       HasVerticalScrollbar=   True
       HeadingIndex    =   -1
-      Height          =   574
+      Height          =   630
       Index           =   -2147483648
       InitialParent   =   ""
       InitialValue    =   ""
@@ -293,6 +295,8 @@ Begin Window WndRepo
       LockLeft        =   True
       LockRight       =   True
       LockTop         =   True
+      MonoFontName    =   ""
+      MonoFontSize    =   0
       RequiresSelection=   False
       RowSelectionType=   "1"
       Scope           =   2
@@ -579,6 +583,10 @@ End
 		Private Shared mIsFileRowExpandedDict As Dictionary
 	#tag EndProperty
 
+	#tag Property, Flags = &h21
+		Private SelectedKeysDict As Dictionary
+	#tag EndProperty
+
 
 	#tag Constant, Name = kCaptionCollapseAll, Type = String, Dynamic = False, Default = \"Collapse All", Scope = Private
 	#tag EndConstant
@@ -604,6 +612,18 @@ End
 	#tag Constant, Name = kCaptionStageTheseLines, Type = String, Dynamic = False, Default = \"Stage These Lines", Scope = Private
 	#tag EndConstant
 
+	#tag Constant, Name = kColorAdditionBubbleDark, Type = Color, Dynamic = False, Default = \"&c0B560800", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = kColorAdditionBubbleLight, Type = Color, Dynamic = False, Default = \"&cC0FFAD00", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = kColorSubtractionBubbleDark, Type = Color, Dynamic = False, Default = \"&c51000000", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = kColorSubtractionBubbleLight, Type = Color, Dynamic = False, Default = \"&cFFA29F00", Scope = Private
+	#tag EndConstant
+
 
 #tag EndWindowCode
 
@@ -613,6 +633,19 @@ End
 		  var isEnabled as boolean = me.SelectedRowCount <> 0
 		  BtnStage.Enabled = isEnabled
 		  BtnRevert.Enabled = isEnabled
+		  
+		  if SelectedKeysDict is nil then
+		    SelectedKeysDict = new Dictionary
+		  else
+		    SelectedKeysDict.RemoveAll
+		  end if
+		  
+		  for row as integer = 0 to me.LastRowIndex
+		    if me.Selected( row ) then
+		      SelectedKeysDict.Value( me.CellValueAt( row, 0 ) ) = nil
+		    end if
+		  next
+		  
 		  RefreshLineFiles
 		  
 		End Sub
@@ -624,6 +657,10 @@ End
 		  me.ColumnSortDirectionAt( 1 ) = ListBox.SortDirections.Descending
 		  
 		  me.ColumnAlignmentAt( 1 ) = ListBox.Alignments.Right
+		  me.ColumnAlignmentOffsetAt( 1 ) = -10
+		  
+		  me.MonoFontName = App.MonoFontName
+		  me.MonoFontSize = App.MonoFontSize
 		End Sub
 	#tag EndEvent
 	#tag Event
@@ -652,6 +689,52 @@ End
 		    return true
 		    
 		  end select
+		End Function
+	#tag EndEvent
+	#tag Event
+		Function CellTextPaint(g As Graphics, row As Integer, column As Integer, x as Integer, y as Integer) As Boolean
+		  if me.Selected( row ) then
+		    g.FontName = me.MonoFontName
+		    g.FontSize = me.MonoFontSize
+		    
+		    if Color.IsDarkMode then
+		      g.DrawingColor = Color.White
+		    else
+		      g.DrawingColor = Color.Black
+		    end if
+		    
+		    g.DrawText( me.CellValueAt( row, column ), x, y )
+		    return true
+		  end if
+		End Function
+	#tag EndEvent
+	#tag Event
+		Function CellBackgroundPaint(g As Graphics, row As Integer, column As Integer) As Boolean
+		  if column = 1 and me.Selected( row ) then
+		    var tag as variant = me.RowTagAt( row )
+		    var lines() as M_Git.DiffLine = tag
+		    var line as M_Git.DiffLine = lines( 0 )
+		    
+		    if line.IsAddition then
+		      if Color.IsDarkMode then
+		        g.DrawingColor = kColorAdditionBubbleDark
+		      else
+		        g.DrawingColor = kColorAdditionBubbleLight
+		      end if
+		      
+		    elseif line.IsSubtraction then
+		      if Color.IsDarkMode then
+		        g.DrawingColor = kColorSubtractionBubbleDark
+		      else
+		        g.DrawingColor = kColorSubtractionBubbleLight
+		      end if
+		    end if
+		    
+		    g.FillRoundRectangle( 5, 1, g.Width - 10, g.Height - 2, 20, 20 )
+		    
+		    return true
+		    
+		  end if
 		End Function
 	#tag EndEvent
 #tag EndEvents
@@ -733,7 +816,9 @@ End
 		    next
 		    
 		    if hunkIndex < hunks.LastRowIndex then
-		      me.AddRow "..."
+		      me.AddRow( "...", "..." )
+		      me.CellAlignmentAt( me.LastAddedRowIndex, 0 ) = Listbox.Alignments.Right
+		      me.CellAlignmentAt( me.LastAddedRowIndex, 1 ) = Listbox.Alignments.Right
 		    end if
 		  next
 		  
@@ -744,26 +829,54 @@ End
 	#tag EndEvent
 	#tag Event
 		Function CellTextPaint(g As Graphics, row As Integer, column As Integer, x as Integer, y as Integer) As Boolean
-		  #pragma unused g
-		  #pragma unused column
-		  #pragma unused x
-		  #pragma unused y
-		  
 		  if me.ExpandableRowAt( row ) then
 		    return true
 		  end if
 		  
-		  
+		  if column = me.LineValueColumn then
+		    var line as M_Git.DiffLine = me.RowTagAt( row )
+		    
+		    if line.IsAddition or line.IsSubtraction then
+		      g.FontName = me.MonoFontName
+		      g.FontSize = me.MonoFontSize
+		      g.Bold = true
+		      
+		      if SelectedKeysDict.HasKey( line.Value.Trim ) = false then
+		        if Color.IsDarkMode then
+		          g.DrawingColor = Color.LightGray
+		        else
+		          g.DrawingColor = Color.DarkGray
+		        end if
+		        g.Bold = false
+		        
+		      elseif Color.IsDarkMode then
+		        g.DrawingColor = Color.White
+		        
+		      else
+		        g.DrawingColor = Color.Black
+		      end if
+		      
+		      g.DrawText( line.Value, x, y )
+		      return true
+		    end if
+		  end if
 		End Function
 	#tag EndEvent
 	#tag Event
 		Function CellBackgroundPaint(g As Graphics, row As Integer, column As Integer) As Boolean
+		  const kArc as integer = 20
+		  const kRoundRectBuffer as integer = 50
 		  const kBuffer as integer = 25
 		  const kHeightBuffer as integer = 4
 		  
 		  if row >= me.RowCount then
-		    return true
+		    return false
 		  end if
+		  
+		  var startingX as integer = column * me.ColumnAt( 0 ).WidthActual
+		  var useX as integer = 0 - startingX + kBuffer
+		  var useY as integer = g.Height - kHeightBuffer
+		  var isSelected as boolean = me.Selected( row )
 		  
 		  if me.ExpandableRowAt( row ) then
 		    var spec as string = me.CellValueAt( row, 0 )
@@ -771,16 +884,85 @@ End
 		    g.FontName = me.FontName
 		    g.FontSize = me.FontSize
 		    g.Bold = true
-		    var startingX as integer = column * me.ColumnAt( 0 ).WidthActual
 		    
-		    if IsDarkMode then
-		      g.DrawingColor = Color.White
+		    var textColor as color
+		    var backColor as color
+		    
+		    if isSelected then
+		      backColor = Color.HighlightColor
+		      textColor = Color.Black
+		      
+		    elseif Color.IsDarkMode then
+		      backColor = &c1E99FC00
+		      textColor = Color.White
+		      
 		    else
-		      g.DrawingColor = Color.Black
+		      backColor = &c8DA5FB00
+		      textColor = Color.Black
 		    end if
 		    
-		    g.DrawText( spec, 0 - startingX + kBuffer, g.Height - kHeightBuffer )
+		    g.DrawingColor = backColor
+		    if isSelected then
+		      g.FillRectangle( 0, 0, g.Width, g.Height )
+		    end if
+		    
+		    //
+		    // Highlight the filename
+		    //
+		    var specParts() as string = spec.Split( "/" )
+		    var filename as string = if( specParts.Count <> 0, specParts.Pop, "" )
+		    if specParts.Count = 0 then
+		      spec = ""
+		    else
+		      spec = String.FromArray( specParts, "/" ) + "/"
+		    end if
+		    
+		    g.DrawingColor = textColor
+		    
+		    g.Bold = false
+		    g.DrawText( spec, useX, useY )
+		    
+		    var swidth as double = g.TextWidth( spec )
+		    g.Bold = true
+		    g.DrawingColor = if( Color.IsDarkMode, &c1E99FC00, Color.Blue )
+		    g.DrawText( filename, useX + swidth, useY )
+		    
 		    return true
+		    
+		  elseif me.RowTagAt( row ).IsNull then
+		    //
+		    // Hunk separator
+		    //
+		    return false
+		    
+		  elseif column = me.LineValueColumn then
+		    var tag as variant = me.RowTagAt( row )
+		    var line as M_Git.DiffLine = tag
+		    var drawIt as boolean
+		    
+		    if line.IsAddition then
+		      if Color.IsDarkMode then
+		        g.DrawingColor = kColorAdditionBubbleDark
+		      else
+		        g.DrawingColor = kColorAdditionBubbleLight
+		      end if
+		      drawIt = true
+		      
+		    elseif line.IsSubtraction then
+		      if Color.IsDarkMode then
+		        g.DrawingColor = kColorSubtractionBubbleDark
+		      else
+		        g.DrawingColor = kColorSubtractionBubbleLight
+		      end if
+		      drawIt = true
+		    end if
+		    
+		    if drawIt then
+		      g.FillRoundRectangle( 5, 1, g.Width - 10, g.Height - 2, 20, 20 )
+		    end if
+		    
+		    return drawIt or isSelected
+		    
 		  end if
 		  
 		  
@@ -915,6 +1097,13 @@ End
 		  end if
 		  
 		End Function
+	#tag EndEvent
+	#tag Event
+		Sub Open()
+		  me.MonoFontName = App.MonoFontName
+		  me.MonoFontSize = App.MonoFontSize
+		  
+		End Sub
 	#tag EndEvent
 #tag EndEvents
 #tag ViewBehavior

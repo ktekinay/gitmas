@@ -46,7 +46,8 @@ Inherits Application
 		  "Lucida Console", _
 		  "Courier New", _
 		  "Courier", _
-		  "Monaco" _
+		  "Monaco", _
+		  GitmasListbox.kDefaultMonoFontName _
 		  )
 		  
 		  for each f as string in bestFonts
@@ -58,6 +59,7 @@ Inherits Application
 		  
 		  if MonoFontName = "" then
 		    MonoFontName = "SmallSystem"
+		    MonoFontSize = 0
 		  end if
 		  
 		End Sub
@@ -133,6 +135,10 @@ Inherits Application
 		MonoFontName As String
 	#tag EndProperty
 
+	#tag Property, Flags = &h0
+		MonoFontSize As Integer = 10
+	#tag EndProperty
+
 	#tag ComputedProperty, Flags = &h0
 		#tag Getter
 			Get
@@ -171,6 +177,14 @@ Inherits Application
 			InitialValue=""
 			Type="String"
 			EditorType="MultiLineEditor"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="MonoFontSize"
+			Visible=false
+			Group="Behavior"
+			InitialValue="10"
+			Type="Integer"
+			EditorType=""
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class
