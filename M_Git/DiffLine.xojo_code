@@ -174,6 +174,7 @@ Protected Class DiffLine
 				"0 - Unchanged"
 				"1 - Addition"
 				"2 - Subtraction"
+				"3 - NoTrailingNewline"
 			#tag EndEnumValues
 		#tag EndViewProperty
 		#tag ViewProperty

@@ -92,17 +92,21 @@ Protected Class DiffFile
 		    newPath = ParentFolder.NativePath
 		    pathSpec = path.Middle( 2 )
 		    
+		  elseif path = "/dev/null" then
+		    newPath = parentFolder.NativePath
+		    pathSpec = path
+		    
 		  elseif left2 = "a/" or left2 = "b/" then
 		    newPath = parentFolder.NativePath + path.Middle( 1 )
 		    pathSpec = path.Middle( 2 )
-		      
+		    
 		  else
 		    newPath = path
 		    pathSpec = path
 		  end if
 		  
 		  #if TargetWindows then
-		    path = path.ReplaceAll( "/", "\" )
+		    newPath = newPath.ReplaceAll( "/", "\" )
 		  #endif
 		  
 		  var f as new FolderItem( newPath )
