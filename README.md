@@ -19,6 +19,11 @@ ktekinay at mactechnologies dot com
 
 See the included LICENSE file for the legal stuff.
 
+With special thanks for testing and suggestions to:
+
+* Jeremy Cowgar
+* Justin Elliott
+
 ## Release Notes
 
 **1.0** (Aug. 15, 2020)
