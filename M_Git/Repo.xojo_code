@@ -364,7 +364,7 @@ Protected Class Repo
 		      if line.IsUnchanged then
 		        addItBack = true
 		        
-		      elseif line.LineType = M_Git.LineTypes.NoTrailingNewline then
+		      elseif line.LineType = M_Git.LineTypes.NoTrailingNewline or line.LineType = M_Git.LineTypes.Other then
 		        addItBack = false
 		        
 		      else
