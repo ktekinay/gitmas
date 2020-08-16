@@ -214,6 +214,7 @@ Begin Window WndRepo
    End
    Begin M_Git.Repo MyRepo
       CurrentBranch   =   ""
+      Enabled         =   True
       EOL             =   ""
       Index           =   -2147483648
       LockedInPosition=   True
