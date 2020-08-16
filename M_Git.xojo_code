@@ -24,6 +24,31 @@ Protected Module M_Git
 
 	#tag Method, Flags = &h21
 		Private Function GitIt(repoPath As FolderItem, subcommand As String) As String
+		  var sh as new Shell
+		  GitIt( repoPath, subcommand, sh )
+		  
+		  if sh.ExitCode = 0 then
+		    System.DebugLog( "...success" )
+		  else
+		    System.DebugLog( "...FAILED (" + sh.ExitCode.ToString + ")" )
+		  end if
+		  
+		  var result as string = sh.Result.DefineEncoding( Encodings.UTF8 )
+		  if result.Length <= 256 then
+		    System.DebugLog( result )
+		  else
+		    System.DebugLog( result.Left( 250 ) + "..." )
+		  end if
+		  
+		  MaybeExceptionFromShell( "Error executing git command " + subcommand, sh )
+		  
+		  return result
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub GitIt(repoPath As FolderItem, subcommand As String, sh As Shell)
 		  Init
 		  
 		  var cmd as string
@@ -39,22 +64,9 @@ Protected Module M_Git
 		  cmd = cmd + GitCommand + subcommand
 		  
 		  System.DebugLog( "Executing: " + cmd )
-		  var sh as new Shell
 		  sh.Execute( cmd )
-		  if sh.ExitCode = 0 then
-		    System.DebugLog( "...success" )
-		  else
-		    System.DebugLog( "...FAILED (" + sh.ExitCode.ToString + ")" )
-		  end if
 		  
-		  var result as string = sh.Result.DefineEncoding( Encodings.UTF8 )
-		  System.DebugLog( result )
-		  
-		  MaybeExceptionFromShell( "Error executing git command " + subcommand, sh )
-		  
-		  return result
-		  
-		End Function
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
@@ -100,8 +112,6 @@ Protected Module M_Git
 		      sh.Execute "where git"
 		      
 		    #endif
-		    
-		    var path as string = System.EnvironmentVariable( "PATH" )
 		    
 		    MaybeExceptionFromShell( "Error finding git command", sh )
 		    
@@ -223,7 +233,8 @@ Protected Module M_Git
 		Unchanged
 		  Addition
 		  Subtraction
-		NoTrailingNewline
+		  NoTrailingNewline
+		Other
 	#tag EndEnum
 
 

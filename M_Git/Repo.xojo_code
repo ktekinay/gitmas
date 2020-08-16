@@ -17,6 +17,10 @@ Protected Class Repo
 		Sub Constructor()
 		  M_Git.Init
 		  
+		  StatusShell = new Shell
+		  StatusShell.ExecuteMode = Shell.ExecuteModes.Asynchronous
+		  AddHandler StatusShell.Completed, WeakAddressOf StatusShell_Completed
+		  
 		  CheckStatusTimer = new Timer
 		  AddHandler CheckStatusTimer.Action, WeakAddressOf CheckStatusTimer_Action
 		  CheckStatusTimer.Period = 5 * 1000
@@ -40,6 +44,14 @@ Protected Class Repo
 		    CheckStatusTimer.RunMode = Timer.RunModes.Off
 		    RemoveHandler CheckStatusTimer.Action, WeakAddressOf CheckStatusTimer_Action
 		    CheckStatusTimer = nil
+		  end if
+		  
+		  if StatusShell isa object then
+		    if StatusShell.IsRunning then
+		      StatusShell.Close
+		    end if
+		    RemoveHandler StatusShell.Completed, WeakAddressOf StatusShell_Completed
+		    StatusShell = nil
 		  end if
 		  
 		End Sub
@@ -255,30 +267,16 @@ Protected Class Repo
 		  if GitFolder is nil then
 		    CheckStatusTimer.RunMode = Timer.RunModes.Off
 		    
+		  elseif StatusShell is nil or StatusShell.IsRunning then
+		    //
+		    // Do nothing
+		    //
+		    
 		  else
 		    CheckStatusTimer.RunMode = Timer.RunModes.Multiple
 		    CheckStatusTimer.Reset
-		    
 		    try
-		      var currentStatus as string = M_Git.GitIt( GitFolder, M_Git.kGitStatus ) + &uA + GitFolder.NativePath
-		      
-		      if currentStatus.Compare( LastStatus, ComparisonOptions.CaseSensitive ) <> 0 then
-		        //
-		        // Get the current data
-		        //
-		        self.Diffs = GetDiffs( false )
-		        self.DiffsStaged = GetDiffs( true )
-		        
-		        //
-		        // Store the current status
-		        //
-		        LastStatus = currentStatus
-		        
-		        //
-		        // Let the caller know
-		        //
-		        RaiseEvent Changed
-		      end if
+		      M_Git.GitIt( GitFolder, M_Git.kGitStatus, StatusShell )
 		      
 		    catch err as RuntimeException
 		      if err isa EndException or err isa ThreadEndException then
@@ -553,6 +551,49 @@ Protected Class Repo
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Sub StatusShell_Completed(sender As Shell)
+		  try
+		    if sender.ExitCode = 0 then
+		      System.DebugLog( "...status check success" )
+		    else
+		      System.DebugLog( "...status check FAILED (" + sender.ExitCode.ToString + ")" )
+		    end if
+		    
+		    M_Git.MaybeExceptionFromShell( "Error checking status", sender )
+		    
+		    var currentStatus as string = sender.ReadAll.DefineEncoding( Encodings.UTF8 ) + &uA + GitFolder.NativePath
+		    
+		    if currentStatus.Compare( LastStatus, ComparisonOptions.CaseSensitive ) <> 0 then
+		      //
+		      // Get the current data
+		      //
+		      self.Diffs = GetDiffs( false )
+		      self.DiffsStaged = GetDiffs( true )
+		      
+		      //
+		      // Store the current status
+		      //
+		      LastStatus = currentStatus
+		      
+		      //
+		      // Let the caller know
+		      //
+		      RaiseEvent Changed
+		    end if
+		    
+		  catch err as RuntimeException
+		    if err isa EndException or err isa ThreadEndException then
+		      raise err
+		    end if
+		    
+		    RaiseEvent RefreshError( err )
+		    
+		  end try
+		  
+		End Sub
+	#tag EndMethod
+
 
 	#tag Hook, Flags = &h0, Description = 546865206769742073746174757320686173206368616E6765642E
 		Event Changed()
@@ -639,6 +680,10 @@ Protected Class Repo
 
 	#tag Property, Flags = &h21
 		Private mGitFolderSaveInfo As String
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private StatusShell As Shell
 	#tag EndProperty
 
 

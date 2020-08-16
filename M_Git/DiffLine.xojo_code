@@ -16,6 +16,8 @@ Protected Class DiffLine
 		    LineType = M_Git.LineTypes.Subtraction
 		  case "\" 
 		    LineType = M_Git.LineTypes.NoTrailingNewline
+		  case "*"
+		    LineType = M_Git.LineTypes.Other
 		  case else
 		    raise new GitException( "Could not determine line type of '" + line + "'" )
 		  end select
