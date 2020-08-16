@@ -628,6 +628,7 @@ End
 		  me.ColumnSortDirectionAt( 1 ) = ListBox.SortDirections.Descending
 		  
 		  me.ColumnAlignmentAt( 1 ) = ListBox.Alignments.Right
+		  me.ColumnAlignmentOffsetAt( 1 ) = -10
 		  
 		  me.MonoFontName = App.MonoFontName
 		  me.MonoFontSize = App.MonoFontSize
@@ -659,6 +660,52 @@ End
 		    return true
 		    
 		  end select
+		End Function
+	#tag EndEvent
+	#tag Event
+		Function CellTextPaint(g As Graphics, row As Integer, column As Integer, x as Integer, y as Integer) As Boolean
+		  if me.Selected( row ) then
+		    g.FontName = me.MonoFontName
+		    g.FontSize = me.MonoFontSize
+		    
+		    if Color.IsDarkMode then
+		      g.DrawingColor = Color.White
+		    else
+		      g.DrawingColor = Color.Black
+		    end if
+		    
+		    g.DrawText( me.CellValueAt( row, column ), x, y )
+		    return true
+		  end if
+		End Function
+	#tag EndEvent
+	#tag Event
+		Function CellBackgroundPaint(g As Graphics, row As Integer, column As Integer) As Boolean
+		  if column = 1 and me.Selected( row ) then
+		    var tag as variant = me.RowTagAt( row )
+		    var lines() as M_Git.DiffLine = tag
+		    var line as M_Git.DiffLine = lines( 0 )
+		    
+		    if line.IsAddition then
+		      if Color.IsDarkMode then
+		        g.DrawingColor = &c0B560800
+		      else
+		        g.DrawingColor = &cC0FFAD00
+		      end if
+		      
+		    elseif line.IsSubtraction then
+		      if Color.IsDarkMode then
+		        g.DrawingColor = &c51000000
+		      else
+		        g.DrawingColor = &cFFA29F00
+		      end if
+		    end if
+		    
+		    g.FillRoundRectangle( 5, 1, g.Width - 10, g.Height - 2, 20, 20 )
+		    
+		    return true
+		    
+		  end if
 		End Function
 	#tag EndEvent
 #tag EndEvents

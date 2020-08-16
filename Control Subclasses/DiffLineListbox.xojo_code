@@ -54,6 +54,8 @@ Inherits GitmasListbox
 		    g.FontName = fontName
 		    g.FontSize = fontSize
 		    
+		    var initialColor as color = g.DrawingColor
+		    
 		    if sampleLine.IsAddition then
 		      g.DrawingColor = kColorAddition
 		      g.Bold = true
@@ -69,6 +71,13 @@ Inherits GitmasListbox
 		    elseif column = LineValueColumn and sampleLineIsEmpty then
 		      g.DrawingColor = Color.LightGray
 		      
+		    end if
+		    
+		    if Selected( row ) then
+		      //
+		      // Revert the color
+		      //
+		      g.DrawingColor = initialColor
 		    end if
 		    
 		    if column = LineValueColumn and sampleLineIsEmpty and ShowNoContent then
