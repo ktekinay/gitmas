@@ -740,7 +740,9 @@ End
 		    next
 		    
 		    if hunkIndex < hunks.LastRowIndex then
-		      me.AddRow "..."
+		      me.AddRow( "...", "..." )
+		      me.CellAlignmentAt( me.LastAddedRowIndex, 0 ) = Listbox.Alignments.Right
+		      me.CellAlignmentAt( me.LastAddedRowIndex, 1 ) = Listbox.Alignments.Right
 		    end if
 		  next
 		  
@@ -777,6 +779,8 @@ End
 	#tag EndEvent
 	#tag Event
 		Function CellBackgroundPaint(g As Graphics, row As Integer, column As Integer) As Boolean
+		  const kArc as integer = 20
+		  const kRoundRectBuffer as integer = 50
 		  const kBuffer as integer = 25
 		  const kHeightBuffer as integer = 4
 		  
@@ -784,43 +788,36 @@ End
 		    return false
 		  end if
 		  
+		  var startingX as integer = column * me.ColumnAt( 0 ).WidthActual
+		  var useX as integer = 0 - startingX + kBuffer
+		  var useY as integer = g.Height - kHeightBuffer
+		  var isSelected as boolean = me.Selected( row )
+		  
 		  if me.ExpandableRowAt( row ) then
-		    var startingDrawColow as color = g.DrawingColor
-		    
 		    var spec as string = me.CellValueAt( row, 0 )
 		    
 		    g.FontName = me.FontName
 		    g.FontSize = me.FontSize
 		    g.Bold = true
-		    var startingX as integer = column * me.ColumnAt( 0 ).WidthActual
-		    
-		    const kLightColor as color = Color.White
-		    const kDarkColor as color = Color.DarkGray
 		    
 		    var textColor as color
 		    var backColor as color
 		    
-		    if IsDarkMode then
-		      textColor = kDarkColor
-		      backColor = kLightColor
-		    else
-		      textColor= kLightColor
-		      backColor = kDarkColor
-		    end if
-		    
-		    if me.Selected( row ) then
-		      textColor = backColor
+		    if isSelected then
 		      backColor = Color.HighlightColor
+		      textColor = Color.Black
+		      
+		    elseif IsDarkMode then
+		      backColor = &c1E99FC00
+		      textColor = Color.White
+		      
+		    else
+		      backColor = &c8DA5FB00
+		      textColor = Color.Black
 		    end if
-		    
-		    const kArc as integer = 20
-		    const kRoundRectBuffer as integer = 50
-		    
-		    var useX as integer = 0 - startingX + kBuffer
-		    var useY as integer = g.Height - kHeightBuffer
 		    
 		    g.DrawingColor = backColor
-		    if me.Selected( row ) then
+		    if isSelected then
 		      g.FillRectangle( 0, 0, g.Width, g.Height )
 		      
 		    elseif column = 0 then
@@ -839,17 +836,18 @@ End
 		    
 		    return true
 		    
-		  elseif row < me.RowCount and column = me.LineValueColumn then
+		  elseif me.RowTagAt( row ).IsNull then
+		    //
+		    // Hunk separator
+		    //
+		    return false
+		    
+		  elseif column = me.LineValueColumn then
 		    var tag as variant = me.RowTagAt( row )
 		    var line as M_Git.DiffLine = tag
 		    var drawIt as boolean
 		    
-		    if line is nil then
-		      //
-		      // Do nothing
-		      //
-		      
-		    elseif line.IsAddition then
+		    if line.IsAddition then
 		      if IsDarkMode then
 		        g.DrawingColor = &c0B560800
 		      else
@@ -870,7 +868,7 @@ End
 		      g.FillRoundRectangle( 5, 1, g.Width - 10, g.Height - 2, 20, 20 )
 		    end if
 		    
-		    return drawIt or me.Selected( row )
+		    return drawIt or isSelected
 		    
 		  end if
 		  
