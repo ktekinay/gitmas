@@ -47,7 +47,7 @@ Protected Module M_Git
 		    System.DebugLog( "...FAILED (" + sh.ExitCode.ToString + ")" )
 		  end if
 		  
-		  var result as string = sh.Result.DefineEncoding( Encodings.UTF8 ).Trim
+		  var result as string = sh.Result.DefineEncoding( Encodings.UTF8 )
 		  System.DebugLog( result )
 		  
 		  MaybeExceptionFromShell( "Error executing git command " + subcommand, sh )

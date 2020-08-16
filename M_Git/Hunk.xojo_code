@@ -72,29 +72,31 @@ Protected Class Hunk
 		  
 		  for i as integer = 0 to lines.LastRowIndex
 		    var line as string = lines( i )
-		    var dl as new M_Git.DiffLine( self, line )
-		    dl.DiffIndex = i
-		    
-		    select case dl.LineType
-		    case M_Git.LineTypes.Unchanged
-		      dl.FromLine = fromIndex
-		      dl.ToLine = toIndex
-		      fromIndex = fromIndex + 1
-		      toIndex = toIndex + 1
-		    case LineTypes.Addition
-		      dl.FromLine = -1
-		      dl.ToLine = toIndex
-		      toIndex = toIndex + 1
-		      df.ChangedLineCount = df.ChangedLineCount + 1
+		    if line <> "" then
+		      var dl as new M_Git.DiffLine( self, line )
+		      dl.DiffIndex = i
 		      
-		    case LineTypes.Subtraction
-		      dl.FromLine = fromIndex
-		      dl.ToLine = -1
-		      fromIndex = fromIndex + 1
-		      df.ChangedLineCount = df.ChangedLineCount + 1
-		      
-		    end select
-		    self.Lines.AddRow( dl )
+		      select case dl.LineType
+		      case M_Git.LineTypes.Unchanged
+		        dl.FromLine = fromIndex
+		        dl.ToLine = toIndex
+		        fromIndex = fromIndex + 1
+		        toIndex = toIndex + 1
+		      case LineTypes.Addition
+		        dl.FromLine = -1
+		        dl.ToLine = toIndex
+		        toIndex = toIndex + 1
+		        df.ChangedLineCount = df.ChangedLineCount + 1
+		        
+		      case LineTypes.Subtraction
+		        dl.FromLine = fromIndex
+		        dl.ToLine = -1
+		        fromIndex = fromIndex + 1
+		        df.ChangedLineCount = df.ChangedLineCount + 1
+		        
+		      end select
+		      self.Lines.AddRow( dl )
+		    end if
 		  next
 		  
 		  return
