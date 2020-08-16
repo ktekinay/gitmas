@@ -760,7 +760,17 @@ End
 		    return true
 		  end if
 		  
-		  
+		  if column = me.ColumnCount - 1 then
+		    var line as M_Git.DiffLine = me.RowTagAt( row )
+		    
+		    if line.IsAddition or line.IsSubtraction then
+		      me.FontName = me.MonoFontName
+		      me.FontSize = me.MonoFontSize
+		      g.Bold = true
+		      g.DrawText( line.Value, x, y )
+		      return true
+		    end if
+		  end if
 		End Function
 	#tag EndEvent
 	#tag Event
@@ -780,14 +790,72 @@ End
 		    g.Bold = true
 		    var startingX as integer = column * me.ColumnAt( 0 ).WidthActual
 		    
+		    const kLightColor as color = Color.White
+		    const kDarkColor as color = Color.DarkGray
+		    
+		    var textColor as color
+		    var backColor as color
+		    
 		    if IsDarkMode then
-		      g.DrawingColor = Color.White
+		      textColor = kDarkColor
+		      backColor = kLightColor
 		    else
-		      g.DrawingColor = Color.Black
+		      textColor= kLightColor
+		      backColor = kDarkColor
 		    end if
 		    
-		    g.DrawText( spec, 0 - startingX + kBuffer, g.Height - kHeightBuffer )
+		    const kArc as integer = 20
+		    const kRoundRectBuffer as integer = 50
+		    
+		    var useX as integer = 0 - startingX + kBuffer
+		    var useY as integer = g.Height - kHeightBuffer
+		    
+		    g.DrawingColor = backColor
+		    if column = 0 then
+		      g.FillRoundRectangle( useX - 5, 0, g.Width + 50, g.Height, kArc, kArc )
+		    elseif column = me.ColumnCount - 1 then
+		      g.FillRoundRectangle( 0 - kRoundRectBuffer, 0, g.Width + kRoundRectBuffer, g.Height, kArc, kArc )
+		    else
+		      g.FillRectangle( 0, 0, g.Width, g.Height )
+		    end if
+		    
+		    g.DrawingColor = textColor
+		    g.DrawText( spec, useX, useY )
 		    return true
+		    
+		  elseif row < me.RowCount and column = me.LineValueColumn then
+		    var tag as variant = me.RowTagAt( row )
+		    var line as M_Git.DiffLine = tag
+		    var drawIt as boolean
+		    
+		    if line is nil then
+		      //
+		      // Do nothing
+		      //
+		      
+		    elseif line.IsAddition then
+		      if IsDarkMode then
+		        g.DrawingColor = DiffLineListbox.kColorAddition
+		      else
+		        g.DrawingColor = &cC0FFAD00
+		      end if
+		      drawIt = true
+		      
+		    elseif line.IsSubtraction then
+		      if IsDarkMode then
+		        g.DrawingColor = DiffLineListbox.kColorSubtraction
+		      else
+		        g.DrawingColor = &cFFA29F00
+		      end if
+		      drawIt = true
+		    end if
+		    
+		    if drawIt then
+		      g.FillRoundRectangle( 5, 1, g.Width - 10, g.Height - 2, 20, 20 )
+		    end if
+		    
+		    return drawIt
+		    
 		  end if
 		  
 		  
