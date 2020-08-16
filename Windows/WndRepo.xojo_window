@@ -765,7 +765,7 @@ End
 		      g.FontSize = me.MonoFontSize
 		      g.Bold = true
 		      
-		      if IsDarkMode then
+		      if Color.IsDarkMode then
 		        g.DrawingColor = Color.White
 		      else
 		        g.DrawingColor = Color.Black
@@ -807,7 +807,7 @@ End
 		      backColor = Color.HighlightColor
 		      textColor = Color.Black
 		      
-		    elseif IsDarkMode then
+		    elseif Color.IsDarkMode then
 		      backColor = &c1E99FC00
 		      textColor = Color.White
 		      
@@ -839,7 +839,7 @@ End
 		    
 		    var swidth as double = g.TextWidth( spec )
 		    g.Bold = true
-		    g.DrawingColor = if( IsDarkMode, &c1E99FC00, Color.Blue )
+		    g.DrawingColor = if( Color.IsDarkMode, &c1E99FC00, Color.Blue )
 		    g.DrawText( filename, useX + swidth, useY )
 		    
 		    return true
@@ -856,7 +856,7 @@ End
 		    var drawIt as boolean
 		    
 		    if line.IsAddition then
-		      if IsDarkMode then
+		      if Color.IsDarkMode then
 		        g.DrawingColor = &c0B560800
 		      else
 		        g.DrawingColor = &cC0FFAD00
@@ -864,7 +864,7 @@ End
 		      drawIt = true
 		      
 		    elseif line.IsSubtraction then
-		      if IsDarkMode then
+		      if Color.IsDarkMode then
 		        g.DrawingColor = &c51000000
 		      else
 		        g.DrawingColor = &cFFA29F00

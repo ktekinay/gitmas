@@ -27,7 +27,7 @@ Inherits Listbox
 		  var altRowColorLight as color = &cF0F2FF00
 		  var altRowColorDark as color = &c10101000
 		  
-		  g.DrawingColor = if( IsDarkMode, altRowColorDark, altRowColorLight )
+		  g.DrawingColor = if( Color.IsDarkMode, altRowColorDark, altRowColorLight )
 		  g.FillRectangle( 0, 0, g.Width, g.Height )
 		  
 		  return true
