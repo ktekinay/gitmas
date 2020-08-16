@@ -819,16 +819,6 @@ End
 		    g.DrawingColor = backColor
 		    if isSelected then
 		      g.FillRectangle( 0, 0, g.Width, g.Height )
-		      
-		    elseif column = 0 then
-		      g.FillRoundRectangle( useX - 5, 0, g.Width + 50, g.Height, kArc, kArc )
-		      
-		    elseif column = me.ColumnCount - 1 then
-		      g.FillRoundRectangle( 0 - kRoundRectBuffer, 0, g.Width + kRoundRectBuffer, g.Height, kArc, kArc )
-		      
-		    else
-		      g.FillRectangle( 0, 0, g.Width, g.Height )
-		      
 		    end if
 		    
 		    var specParts() as string = spec.Split( "/" )
