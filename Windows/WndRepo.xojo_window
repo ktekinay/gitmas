@@ -821,9 +821,16 @@ End
 		      g.FillRectangle( 0, 0, g.Width, g.Height )
 		    end if
 		    
+		    //
+		    // Highlight the filename
+		    //
 		    var specParts() as string = spec.Split( "/" )
 		    var filename as string = if( specParts.Count <> 0, specParts.Pop, "" )
-		    spec = String.FromArray( specParts, "/" ) + "/"
+		    if specParts.Count = 0 then
+		      spec = ""
+		    else
+		      spec = String.FromArray( specParts, "/" ) + "/"
+		    end if
 		    
 		    g.DrawingColor = textColor
 		    
@@ -832,6 +839,7 @@ End
 		    
 		    var swidth as double = g.TextWidth( spec )
 		    g.Bold = true
+		    g.DrawingColor = if( IsDarkMode, &c1E99FC00, Color.Blue )
 		    g.DrawText( filename, useX + swidth, useY )
 		    
 		    return true
