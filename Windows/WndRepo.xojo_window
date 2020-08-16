@@ -583,6 +583,10 @@ End
 		Private Shared mIsFileRowExpandedDict As Dictionary
 	#tag EndProperty
 
+	#tag Property, Flags = &h21
+		Private SelectedKeysDict As Dictionary
+	#tag EndProperty
+
 
 	#tag Constant, Name = kCaptionCollapseAll, Type = String, Dynamic = False, Default = \"Collapse All", Scope = Private
 	#tag EndConstant
@@ -608,6 +612,18 @@ End
 	#tag Constant, Name = kCaptionStageTheseLines, Type = String, Dynamic = False, Default = \"Stage These Lines", Scope = Private
 	#tag EndConstant
 
+	#tag Constant, Name = kColorAdditionBubbleDark, Type = Color, Dynamic = False, Default = \"&c0B560800", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = kColorAdditionBubbleLight, Type = Color, Dynamic = False, Default = \"&cC0FFAD00", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = kColorSubtractionBubbleDark, Type = Color, Dynamic = False, Default = \"&c51000000", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = kColorSubtractionBubbleLight, Type = Color, Dynamic = False, Default = \"&cFFA29F00", Scope = Private
+	#tag EndConstant
+
 
 #tag EndWindowCode
 
@@ -617,6 +633,19 @@ End
 		  var isEnabled as boolean = me.SelectedRowCount <> 0
 		  BtnStage.Enabled = isEnabled
 		  BtnRevert.Enabled = isEnabled
+		  
+		  if SelectedKeysDict is nil then
+		    SelectedKeysDict = new Dictionary
+		  else
+		    SelectedKeysDict.RemoveAll
+		  end if
+		  
+		  for row as integer = 0 to me.LastRowIndex
+		    if me.Selected( row ) then
+		      SelectedKeysDict.Value( me.CellValueAt( row, 0 ) ) = nil
+		    end if
+		  next
+		  
 		  RefreshLineFiles
 		  
 		End Sub
@@ -688,16 +717,16 @@ End
 		    
 		    if line.IsAddition then
 		      if Color.IsDarkMode then
-		        g.DrawingColor = &c0B560800
+		        g.DrawingColor = kColorAdditionBubbleDark
 		      else
-		        g.DrawingColor = &cC0FFAD00
+		        g.DrawingColor = kColorAdditionBubbleLight
 		      end if
 		      
 		    elseif line.IsSubtraction then
 		      if Color.IsDarkMode then
-		        g.DrawingColor = &c51000000
+		        g.DrawingColor = kColorSubtractionBubbleDark
 		      else
-		        g.DrawingColor = &cFFA29F00
+		        g.DrawingColor = kColorSubtractionBubbleLight
 		      end if
 		    end if
 		    
@@ -812,8 +841,17 @@ End
 		      g.FontSize = me.MonoFontSize
 		      g.Bold = true
 		      
-		      if Color.IsDarkMode then
+		      if SelectedKeysDict.HasKey( line.Value.Trim ) = false then
+		        if Color.IsDarkMode then
+		          g.DrawingColor = Color.LightGray
+		        else
+		          g.DrawingColor = Color.DarkGray
+		        end if
+		        g.Bold = false
+		        
+		      elseif Color.IsDarkMode then
 		        g.DrawingColor = Color.White
+		        
 		      else
 		        g.DrawingColor = Color.Black
 		      end if
@@ -904,17 +942,17 @@ End
 		    
 		    if line.IsAddition then
 		      if Color.IsDarkMode then
-		        g.DrawingColor = &c0B560800
+		        g.DrawingColor = kColorAdditionBubbleDark
 		      else
-		        g.DrawingColor = &cC0FFAD00
+		        g.DrawingColor = kColorAdditionBubbleLight
 		      end if
 		      drawIt = true
 		      
 		    elseif line.IsSubtraction then
 		      if Color.IsDarkMode then
-		        g.DrawingColor = &c51000000
+		        g.DrawingColor = kColorSubtractionBubbleDark
 		      else
-		        g.DrawingColor = &cFFA29F00
+		        g.DrawingColor = kColorSubtractionBubbleLight
 		      end if
 		      drawIt = true
 		    end if
