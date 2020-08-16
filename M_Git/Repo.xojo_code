@@ -2,6 +2,10 @@
 Protected Class Repo
 	#tag Method, Flags = &h21
 		Private Sub CheckStatusTimer_Action(sender As Timer)
+		  if IsDestructing then
+		    return
+		  end if
+		  
 		  if GitFolder is nil then
 		    sender.RunMode = Timer.RunModes.Off
 		  else
@@ -40,6 +44,8 @@ Protected Class Repo
 
 	#tag Method, Flags = &h21
 		Private Sub Destructor()
+		  IsDestructing = true
+		  
 		  if CheckStatusTimer isa object then
 		    CheckStatusTimer.RunMode = Timer.RunModes.Off
 		    RemoveHandler CheckStatusTimer.Action, WeakAddressOf CheckStatusTimer_Action
@@ -553,6 +559,10 @@ Protected Class Repo
 
 	#tag Method, Flags = &h21
 		Private Sub StatusShell_Completed(sender As Shell)
+		  if IsDestructing then
+		    return
+		  end if
+		  
 		  try
 		    if sender.ExitCode = 0 then
 		      System.DebugLog( "...status check success" )
@@ -673,6 +683,10 @@ Protected Class Repo
 		#tag EndSetter
 		GitFolder As FolderItem
 	#tag EndComputedProperty
+
+	#tag Property, Flags = &h21
+		Private IsDestructing As Boolean
+	#tag EndProperty
 
 	#tag Property, Flags = &h21
 		Private LastStatus As String
