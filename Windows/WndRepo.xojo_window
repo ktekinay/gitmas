@@ -132,6 +132,8 @@ Begin Window WndRepo
       LockLeft        =   True
       LockRight       =   False
       LockTop         =   True
+      MonoFontName    =   ""
+      MonoFontSize    =   0
       RequiresSelection=   False
       RowSelectionType=   "1"
       Scope           =   2
@@ -293,6 +295,8 @@ Begin Window WndRepo
       LockLeft        =   True
       LockRight       =   True
       LockTop         =   True
+      MonoFontName    =   ""
+      MonoFontSize    =   0
       RequiresSelection=   False
       RowSelectionType=   "1"
       Scope           =   2
@@ -624,6 +628,9 @@ End
 		  me.ColumnSortDirectionAt( 1 ) = ListBox.SortDirections.Descending
 		  
 		  me.ColumnAlignmentAt( 1 ) = ListBox.Alignments.Right
+		  
+		  me.MonoFontName = App.MonoFontName
+		  me.MonoFontSize = App.MonoFontSize
 		End Sub
 	#tag EndEvent
 	#tag Event
@@ -915,6 +922,13 @@ End
 		  end if
 		  
 		End Function
+	#tag EndEvent
+	#tag Event
+		Sub Open()
+		  me.MonoFontName = App.MonoFontName
+		  me.MonoFontSize = App.MonoFontSize
+		  
+		End Sub
 	#tag EndEvent
 #tag EndEvents
 #tag ViewBehavior

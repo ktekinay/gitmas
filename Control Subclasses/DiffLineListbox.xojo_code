@@ -27,8 +27,8 @@ Inherits GitmasListbox
 		    return true
 		  end if
 		  
-		  var fontName as string = App.MonoFontName
-		  var fontSize as integer = 10
+		  var fontName as string = me.MonoFontName
+		  var fontSize as integer = me.MonoFontSize
 		  
 		  var tag as variant = RowTagAt( row )
 		  var sampleLine as M_Git.DiffLine
