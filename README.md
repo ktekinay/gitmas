@@ -10,7 +10,7 @@ gitmas is not a complete git client, but rather meant to be used in conjunction 
 
 ## Requirements
 
-The git command line utility must be installed and must be discoverable though your shell path. To verify this, open a terminal or shell and type `git --version`.
+A recent `git` command line utility must be installed and discoverable though your shell path. To verify this, open a terminal or shell and type `git --version`.
 
 ## Who Did This?
 
@@ -21,6 +21,6 @@ See the included LICENSE file for the legal stuff.
 
 ## Release Notes
 
-**1.0** (__)
+**1.0** (Aug. 15, 2020)
 
 * Initial release
