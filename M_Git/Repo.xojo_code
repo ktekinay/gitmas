@@ -361,11 +361,25 @@ Protected Class Repo
 		    var sourceIndex as integer = startingIndex
 		    
 		    for each line as M_Git.DiffLine in hunk.Lines
-		      var isReset as boolean = _
-		      line.LineType <> M_Git.LineTypes.Unchanged and _
-		      resetLines.IndexOf( line ) <> -1
+		      var addItBack as boolean
 		      
-		      if isReset = false or line.LineType = M_Git.LineTypes.Subtraction then
+		      if line.IsUnchanged then
+		        addItBack = true
+		        
+		      elseif line.LineType = M_Git.LineTypes.NoTrailingNewline then
+		        addItBack = false
+		        
+		      else
+		        var isReset as boolean = resetLines.IndexOf( line ) <> -1
+		        
+		        if isReset and line.IsSubtraction then
+		          addItBack = true
+		        elseif not isReset and line.IsAddition then
+		          addItBack = true
+		        end if
+		      end if
+		      
+		      if addItBack then
 		        //
 		        // Add it back
 		        //
