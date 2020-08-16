@@ -751,22 +751,24 @@ End
 	#tag EndEvent
 	#tag Event
 		Function CellTextPaint(g As Graphics, row As Integer, column As Integer, x as Integer, y as Integer) As Boolean
-		  #pragma unused g
-		  #pragma unused column
-		  #pragma unused x
-		  #pragma unused y
-		  
 		  if me.ExpandableRowAt( row ) then
 		    return true
 		  end if
 		  
-		  if column = me.ColumnCount - 1 then
+		  if column = me.LineValueColumn then
 		    var line as M_Git.DiffLine = me.RowTagAt( row )
 		    
 		    if line.IsAddition or line.IsSubtraction then
-		      me.FontName = me.MonoFontName
-		      me.FontSize = me.MonoFontSize
+		      g.FontName = me.MonoFontName
+		      g.FontSize = me.MonoFontSize
 		      g.Bold = true
+		      
+		      if IsDarkMode then
+		        g.DrawingColor = Color.White
+		      else
+		        g.DrawingColor = Color.Black
+		      end if
+		      
 		      g.DrawText( line.Value, x, y )
 		      return true
 		    end if
@@ -779,10 +781,12 @@ End
 		  const kHeightBuffer as integer = 4
 		  
 		  if row >= me.RowCount then
-		    return true
+		    return false
 		  end if
 		  
 		  if me.ExpandableRowAt( row ) then
+		    var startingDrawColow as color = g.DrawingColor
+		    
 		    var spec as string = me.CellValueAt( row, 0 )
 		    
 		    g.FontName = me.FontName
@@ -804,6 +808,11 @@ End
 		      backColor = kDarkColor
 		    end if
 		    
+		    if me.Selected( row ) then
+		      textColor = backColor
+		      backColor = Color.HighlightColor
+		    end if
+		    
 		    const kArc as integer = 20
 		    const kRoundRectBuffer as integer = 50
 		    
@@ -811,16 +820,23 @@ End
 		    var useY as integer = g.Height - kHeightBuffer
 		    
 		    g.DrawingColor = backColor
-		    if column = 0 then
+		    if me.Selected( row ) then
+		      g.FillRectangle( 0, 0, g.Width, g.Height )
+		      
+		    elseif column = 0 then
 		      g.FillRoundRectangle( useX - 5, 0, g.Width + 50, g.Height, kArc, kArc )
+		      
 		    elseif column = me.ColumnCount - 1 then
 		      g.FillRoundRectangle( 0 - kRoundRectBuffer, 0, g.Width + kRoundRectBuffer, g.Height, kArc, kArc )
+		      
 		    else
 		      g.FillRectangle( 0, 0, g.Width, g.Height )
+		      
 		    end if
 		    
 		    g.DrawingColor = textColor
 		    g.DrawText( spec, useX, useY )
+		    
 		    return true
 		    
 		  elseif row < me.RowCount and column = me.LineValueColumn then
@@ -835,7 +851,7 @@ End
 		      
 		    elseif line.IsAddition then
 		      if IsDarkMode then
-		        g.DrawingColor = DiffLineListbox.kColorAddition
+		        g.DrawingColor = &c0B560800
 		      else
 		        g.DrawingColor = &cC0FFAD00
 		      end if
@@ -843,7 +859,7 @@ End
 		      
 		    elseif line.IsSubtraction then
 		      if IsDarkMode then
-		        g.DrawingColor = DiffLineListbox.kColorSubtraction
+		        g.DrawingColor = &c51000000
 		      else
 		        g.DrawingColor = &cFFA29F00
 		      end if
@@ -854,7 +870,7 @@ End
 		      g.FillRoundRectangle( 5, 1, g.Width - 10, g.Height - 2, 20, 20 )
 		    end if
 		    
-		    return drawIt
+		    return drawIt or me.Selected( row )
 		    
 		  end if
 		  
