@@ -136,7 +136,7 @@ Inherits Application
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
-		MonoFontSize As Integer = 10
+		MonoFontSize As Integer = 11
 	#tag EndProperty
 
 	#tag ComputedProperty, Flags = &h0
